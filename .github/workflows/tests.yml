@@ -41,18 +41,16 @@ jobs:
         run: cd backend && npm ci
 
       - name: Run Drizzle Migrations
-        run: cd backend && npx drizzle-kit push
+        run: cd backend && npm run db:migrate
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test_acquisitions
 
       - name: Run tests
         id: tests
         run: |
-          # FIX: We run npm test from the BACKEND, 
-          # but we must tell Jest to look for tests in the parent directory
           cd backend
-          echo "::notice::Running test suite..."
-          npm test -- --testPathPattern=../tests
+          echo "::notice::Running backend test suite..."
+          npm test
         env:
           NODE_ENV: test
           NODE_OPTIONS: --experimental-vm-modules
