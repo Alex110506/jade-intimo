@@ -1,13 +1,19 @@
-import { pgTable, serial, varchar, timestamp, integer } from 'drizzle-orm/pg-core'; // 1. Added integer
+import {
+  pgTable,
+  serial,
+  varchar,
+  timestamp,
+  integer,
+} from 'drizzle-orm/pg-core'; // 1. Added integer
 import { users } from './user.model';
 
-export const addresses=pgTable('addresses',{
+export const addresses = pgTable('addresses', {
   id: serial('id').primaryKey(),
   user_id: integer('user_id')
     .references(() => users.id)
-    .unique() 
+    .unique()
     .notNull(),
-        
+
   adress_line: varchar('adress_line', { length: 255 }).notNull(),
   city: varchar('city', { length: 128 }).notNull(),
   state: varchar('state', { length: 128 }).notNull(),

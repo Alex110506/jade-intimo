@@ -1,14 +1,19 @@
-import express from "express";
-import { signupController,loginController,logoutController,updateDataController } from "#controllers/auth.controller.js";
-import { authenticateToken } from "#middleware/auth.middleware.js";
+import express from 'express';
+import {
+  signupController,
+  loginController,
+  logoutController,
+  updateDataController,
+} from '#controllers/auth.controller.js';
+import { authenticateToken } from '#middleware/auth.middleware.js';
 
-const router=express.Router()
+const router = express.Router();
 
-router.post("/signup",signupController)
-router.post("/login",loginController)
-router.post("/logout",authenticateToken,logoutController)
+router.post('/signup', signupController);
+router.post('/login', loginController);
+router.post('/logout', authenticateToken, logoutController);
 
-router.put("/updateData",authenticateToken,updateDataController)
+router.put('/updateData', authenticateToken, updateDataController);
 
 // router.post("/addAdress",protectedRoute,addAdressController)
 // router.put("/updateAdress",protectedRoute,updateAdressController)
@@ -17,4 +22,4 @@ router.put("/updateData",authenticateToken,updateDataController)
 //     res.status(200).json({success:true,user:req.user})
 // })
 
-export default router
+export default router;
