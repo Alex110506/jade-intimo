@@ -48,9 +48,11 @@ jobs:
       - name: Run tests
         id: tests
         run: |
+          # FIX: We run npm test from the BACKEND, 
+          # but we must tell Jest to look for tests in the parent directory
           cd backend
           echo "::notice::Running test suite..."
-          npm test
+          npm test -- --testPathPattern=../tests
         env:
           NODE_ENV: test
           NODE_OPTIONS: --experimental-vm-modules
