@@ -4,11 +4,15 @@ import {
   findUserByEmail,
   verifyPassword,
   updateUser,
+  createAdress,
+  updatAdress,
 } from '#services/auth.service.js';
 import {
   signupScheema,
   loginScheema,
   updateUserSchema,
+  addAddress,
+  updateAddress,
 } from '#validations/auth.validation.js';
 import { jwttoken } from '#utils/jwt.js';
 import { formatValidationError } from '#utils/format.js';
@@ -146,6 +150,95 @@ export const updateDataController = async (req, res) => {
     return res.status(200).json({ message: 'user updated', user: updated });
   } catch (error) {
     logger.error('Update error', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+export const addAddressController = async (req,res)=>{
+  try {
+    const validationResult=addAddress.safeParse(req.body)
+    if(!validationResult.success){
+      return res.status(400).json({
+        error: 'Adaugarea Adresei esuata',
+        details: formatValidationError(validationResult.error),
+      });
+    }
+
+    const {address_line,city,state,postal_code,country}=validationResult.data
+
+    const token = cookies.get(req, 'token');
+    const payload = jwttoken.verify(token);
+
+    const user_id = payload.id;
+
+    const address=await createAdress({
+      user_id,
+      address_line,
+      city,
+      state,
+      postal_code,
+      country
+    })
+
+    res.status(201).json({
+      message:"address created",
+      address:{
+        id:address.id,
+        user_id:address.user_id,
+        address_line:address.address_line,
+        city:address.city,
+        state:address.state,
+        postal_code:address.postal_code,
+        country:address.country,
+        created_at:address.created_at
+      }
+    })
+  }
+  catch (error) {
+    logger.error('address create error', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export const updateAddressController=async (req,res)=>{
+  try {
+    const validationResult = updateAddress.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: 'Actualizarea adresei esuata',
+        details: formatValidationError(validationResult.error),
+      });
+    }
+
+    const data = { ...validationResult.data };
+
+    const token = cookies.get(req, 'token');
+    const payload = jwttoken.verify(token);
+
+    const user_id = payload.id;
+
+    const address = await updatAdress(user_id, data);
+
+    if (!address) {
+      return res.status(404).json({ error: 'Address not found' });
+    }
+
+    return res.status(200).json({
+      message: 'address updated',
+      address: {
+        id: address.id,
+        user_id: address.user_id,
+        address_line: address.address_line,
+        city: address.city,
+        state: address.state,
+        postal_code: address.postal_code,
+        country: address.country,
+      },
+    });
+  } catch (error) {
+    logger.error('address update error', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

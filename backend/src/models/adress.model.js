@@ -5,7 +5,7 @@ import {
   timestamp,
   integer,
 } from 'drizzle-orm/pg-core'; // 1. Added integer
-import { users } from './user.model';
+import { users } from './user.model.js';
 
 export const addresses = pgTable('addresses', {
   id: serial('id').primaryKey(),
@@ -14,7 +14,7 @@ export const addresses = pgTable('addresses', {
     .unique()
     .notNull(),
 
-  adress_line: varchar('adress_line', { length: 255 }).notNull(),
+  address_line: varchar('adress_line', { length: 255 }).notNull(),
   city: varchar('city', { length: 128 }).notNull(),
   state: varchar('state', { length: 128 }).notNull(),
   postal_code: varchar('postal_code', { length: 16 }).notNull(),
