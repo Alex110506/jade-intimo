@@ -4,6 +4,8 @@ import {
   loginController,
   logoutController,
   updateDataController,
+  addAddressController,
+  updateAddressController
 } from '#controllers/auth.controller.js';
 import { authenticateToken } from '#middleware/auth.middleware.js';
 
@@ -15,11 +17,13 @@ router.post('/logout', authenticateToken, logoutController);
 
 router.put('/updateData', authenticateToken, updateDataController);
 
-// router.post("/addAdress",protectedRoute,addAdressController)
-// router.put("/updateAdress",protectedRoute,updateAdressController)
+router.post("/addAddress",authenticateToken,addAddressController)
+router.put("/updateAddress",authenticateToken,updateAddressController)
 
-// router.get("/me",protectedRoute,(req,res)=>{
-//     res.status(200).json({success:true,user:req.user})
-// })
+router.get("/me",authenticateToken,(req,res)=>{
+  res.status(200).json({success:true,user:req.user})
+})
+
+//dupa ce fac si orders sa adaug ruta sa primesti toate informatiile
 
 export default router;

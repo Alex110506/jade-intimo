@@ -8,6 +8,13 @@
       "when": 1766511055841,
       "tag": "0000_black_gabe_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766839229241,
+      "tag": "0001_smiling_argent",
+      "breakpoints": true
     }
   ]
 }
