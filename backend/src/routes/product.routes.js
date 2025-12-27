@@ -1,10 +1,13 @@
-import { getNewProducts, 
+import { 
+    getNewProducts, 
     getProductById, 
     getProducts,
     getProductsAdmin,
     createProductAdmin,
     updateProductAdmin,
-    deleteProductAdmin
+    deleteProductAdmin,
+    createVariantAdmin,
+    updateVariantAdmin,
 } from "#controllers/products.controller.js";
 import { adminRoute } from "#middleware/admin.middleware.js";
 import { authenticateToken } from "#middleware/auth.middleware.js";
@@ -12,11 +15,7 @@ import express from "express";
 
 const router=express.Router()
 
-//user endpoints
 
-router.get("/",getProducts)
-router.get('/new',getNewProducts)
-router.get("/:id",getProductById)
 
 //admin endpoints
 
@@ -29,8 +28,16 @@ router.route("/admin/item/:id")
     .delete(authenticateToken,adminRoute,deleteProductAdmin)
     //.post(authenticateToken,adminRoute,addImage)
 
-// router.route("/varaint/:id")
-//     .put(authenticateToken,adminRoute,updateVariant)
+router.route("admin/varaint/:id")
+    .put(authenticateToken,adminRoute,updateVariantAdmin)
+    .post(authenticateToken,adminRoute,createVariantAdmin)
+
+
+//user endpoints
+
+router.get("/",getProducts)
+router.get('/new',getNewProducts)
+router.get("/:id",getProductById)
 
 
 export default router

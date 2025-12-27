@@ -3,8 +3,8 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js"
 import { products } from "#models/product.model.js";
-import { insertProduct, retrieveAllProducts, retrieveNewArrivals, retrieveProductById, updateProduct } from "#services/products.service.js"
-import { createProductSchema, updateProductScheema } from "#validations/product.validation.js";
+import { insertProduct, insertVariant, retrieveAllProducts, retrieveNewArrivals, retrieveProductById, updateProduct, updateVariant } from "#services/products.service.js"
+import { createProductSchema, createVariantScheema, updateProductScheema, updateVariantScheema } from "#validations/product.validation.js";
 import { formatValidationError } from "#utils/format.js";
 import { eq } from "drizzle-orm";
 
@@ -62,9 +62,9 @@ export const getNewProducts=async (req,res)=>{
 }
 
 export const getProductById=async (req,res)=>{
-    const {id}=req.query
+    const {id}=req.params
     try {
-        const data=await retrieveProductById(id)
+        const data=await retrieveProductById(Number(id))
         
         logger.info(`product with id ${id} retrieved successfully`)
 
@@ -219,8 +219,87 @@ export const deleteProductAdmin = async (req, res) => {
     } catch (error) {
         logger.error(`Error deleting product ${req.params.id}:`, error);
         return res.status(500).json({ 
-            error: "Eroare internă de server",
+            error: "Internal server error",
             message: error.message 
         });
     }
 };
+
+
+export const createVariantAdmin=async (req,res)=>{
+    try {
+        const {id}=req.params
+        const productId=Number(id)
+
+        const validationResult=createVariantScheema.safeParse(req.body)
+
+        if(!validationResult.success){
+            return res.status(400).json({
+                error: 'Crearea Variantei Esuata',
+                details: formatValidationError(validationResult.error),
+            });
+        }
+
+        const data={...validationResult.data}
+
+        const variant=await insertVariant(productId,data)
+
+        if (!variant) {
+            logger.error('Insert returned no variant');
+            return res.status(500).json({ error: 'Could not create variant' });
+        }
+
+        logger.info(`Product with id ${variant.id} created successfully`);
+
+
+        return res.status(201).json({
+            message: "variant created successfully",
+            variant: variant
+        });
+
+    } catch (error) {
+        logger.error("error creating product variant")
+        return res.status(500).json({ 
+            error: "Internal server error",
+            message: error.message 
+        });
+    }
+}
+
+export const updateVariantAdmin=async (req,res)=>{
+    try {
+        const {id}=req.params
+        const variantId=Number(id)
+
+        const validationResult=updateVariantScheema.safeParse(req.body)
+
+        if(!validationResult.success){
+            return res.status(400).json({
+                error: 'Actualizarea Variantei Esuata',
+                details: formatValidationError(validationResult.error),
+            });
+        }
+
+        const data={...validationResult.data}
+
+        const updatedVariant=updateVariant(variantId,data)
+
+        if(!updatedVariant){
+            logger.error('Update returned no variant');
+            return res.status(500).json({ error: 'Could not update variant' });
+        }
+
+        logger.info(`Product with id ${variantId} updated successfully`);
+
+        return res.status(201).json({
+            message: "variant updated successfully",
+            variant: updatedVariant
+        });
+    } catch (error) {
+        logger.error("error updating product variant")
+        return res.status(500).json({ 
+            error: "Internal server error",
+            message: error.message 
+        });
+    }
+}

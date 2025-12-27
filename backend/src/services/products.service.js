@@ -35,22 +35,22 @@ export const retrieveAllProducts = async (
                 break;
             case "newest":
             default:
-                orderByClause = desc(products.createdAt);
+                orderByClause = desc(products.created_at);
                 break;
         }
 
-        const data = await db
-            .select()
-            .from(products)
-            .where(whereClause)
+        let query = db.select().from(products);
+        if (whereClause) query = query.where(whereClause);
+
+        const data = await query
             .orderBy(orderByClause)
             .limit(limit)
             .offset(offset);
 
-        const [totalCountResult] = await db
-            .select({ value: countFn() })
-            .from(products)
-            .where(whereClause);
+        let countQuery = db.select({ value: countFn() }).from(products);
+        if (whereClause) countQuery = countQuery.where(whereClause);
+
+        const [totalCountResult] = await countQuery;
         
         const totalItems = totalCountResult?.value || 0;
         const totalPages = Math.ceil(totalItems / limit);
@@ -107,17 +107,17 @@ export const retrieveProductById = async (productId) => {
             .where(eq(products.id, productId))
             .limit(1);
 
-        const varaints=await db
+        const variants = await db
             .select()
             .from(product_variants)
-            .where(eq(product_variants.product_id,productId))
+            .where(eq(product_variants.product_id, productId));
 
         if (!product) {
             return null;
         }
         return {
-            product:product,
-            varaints,varaints
+            product: product,
+            variants: variants
         };
     } catch (error) {
         logger.error(`Error retrieving product with ID ${productId}:`, error);
@@ -178,5 +178,41 @@ export const updateProduct = async (id, data) => {
         throw new Error("Failed to update product in database");
     }
 };
+
+
+export const insertVariant=async (id,data)=>{
+    try {
+        const [variant]=await db.insert(product_variants)
+            .values({
+                product_id:id,
+                size:data.size,
+                quantity:data.quantity
+            })
+            .returning()
+        
+        return variant
+    } catch (error) {
+        logger.error("Error creating product variant:", error);
+        throw new Error("Could not create product variant");
+    }
+}
+
+export const updateVariant=async (id,data)=>{
+    try {
+        const [variant]=await db
+            .update(product_variants)
+            .set({...data})
+            .where(eq(product_variants.id,id))
+            .returning()
+
+        if(!variant)
+            return null
+
+        return variant  
+    } catch (error) {
+        logger.error("error updating the variant",error)
+        throw new Error("Could not update product variant")
+    }
+}
 
 

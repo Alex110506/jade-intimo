@@ -149,3 +149,30 @@
 {"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
 {"level":"info","message":"Product with id 1 created successfully","service":"user-service"}
 {"level":"info","message":"::1 - - [27/Dec/2025:12:40:51 +0000] \"POST /api/products/admin HTTP/1.1\" 201 449 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"product with id undefined retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:52:28 +0000] \"GET /api/products/admin HTTP/1.1\" 200 77 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"cause":{"code":"42601","file":"scan.l","line":"1244","name":"NeonDbError","position":"171","routine":"scanner_yyerror","severity":"ERROR"},"level":"error","message":"Error fetching products: Failed query: select \"id\", \"gender\", \"category\", \"subcategory\", \"name\", \"image\", \"description\", \"material\", \"price\", \"big_sizes\", \"sold_pieces\", \"created_at\" from \"products\" order by  desc limit $1\nparams: 10","params":[10],"query":"select \"id\", \"gender\", \"category\", \"subcategory\", \"name\", \"image\", \"description\", \"material\", \"price\", \"big_sizes\", \"sold_pieces\", \"created_at\" from \"products\" order by  desc limit $1","service":"user-service","stack":"Error: Failed query: select \"id\", \"gender\", \"category\", \"subcategory\", \"name\", \"image\", \"description\", \"material\", \"price\", \"big_sizes\", \"sold_pieces\", \"created_at\" from \"products\" order by  desc limit $1\nparams: 10\n    at NeonHttpPreparedQuery.queryWithCache (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/node_modules/drizzle-orm/pg-core/session.js:41:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async NeonHttpPreparedQuery.execute (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/node_modules/drizzle-orm/neon-http/session.js:45:20)\n    at async retrieveAllProducts (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/products.service.js:42:22)\n    at async getProducts (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/controllers/products.controller.js:18:22)"}
+{"level":"error","message":"Error in getting products: Could not retrieve products from the database","service":"user-service","stack":"Error: Could not retrieve products from the database\n    at retrieveAllProducts (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/products.service.js:70:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async getProducts (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/controllers/products.controller.js:18:22)"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:53:46 +0000] \"GET /api/products/ HTTP/1.1\" 500 91 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:56:38 +0000] \"GET /api/products/ HTTP/1.1\" 200 530 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"product with id undefined retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:56:59 +0000] \"GET /api/products/admin HTTP/1.1\" 200 77 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:58:56 +0000] \"GET /api/products/admin HTTP/1.1\" 401 72 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:59:01 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:59:05 +0000] \"GET /api/products/admin HTTP/1.1\" 200 540 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"new products retrieved sucessfully","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:12:59:56 +0000] \"GET /api/products/new HTTP/1.1\" 200 477 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"product with id undefined retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:13:00:35 +0000] \"GET /api/products/1 HTTP/1.1\" 200 77 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"product with id 1 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:13:02:47 +0000] \"GET /api/products/1 HTTP/1.1\" 200 487 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:13:17:13 +0000] \"DELETE /api/products/admin/item/1 HTTP/1.1\" 401 72 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:13:17:19 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product deleted by admin: Sutien Dantelă Elegance (ID: 1)","service":"user-service"}
+{"level":"info","message":"::1 - - [27/Dec/2025:13:17:25 +0000] \"DELETE /api/products/admin/item/1 HTTP/1.1\" 200 460 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}

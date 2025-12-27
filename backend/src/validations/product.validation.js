@@ -42,7 +42,12 @@ export const updateProductScheema = z.object({
   bigSizes: z.boolean().optional(),
 });
 
-export const updateVariantSchema = z.object({
+export const createVariantScheema = z.object({
+  size: z.string().min(1, "Size is required").max(32, "Size is too long"),
+  quantity: z.number().int().nonnegative("Quantity cannot be negative"),
+});
+
+export const updateVariantScheema = z.object({
   size: z.string().min(1, "Size is required").max(32, "Size is too long").optional(),
   quantity: z.number().int().nonnegative("Quantity cannot be negative").optional(),
 });
