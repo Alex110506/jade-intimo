@@ -9,15 +9,14 @@ import {
   timestamp
 } from "drizzle-orm/pg-core";
 
+export const genderArray = ["women", "men"];
 
-export const genderEnum = pgEnum("gender", ["women", "men"]);
-
-export const categoryEnum = pgEnum("category", [
+export const categoryArray=[
   "noutati", "curvy-marimi-mari", "sutiene", "chiloti", 
   "lenjerie", "pijamale", "imbracaminte", "costume-de-baie", "sosete"
-]);
+]
 
-export const subCategoryEnum = pgEnum("subcategory", [
+export const subcategoryArray=[
   "toate", "toti", "push-up", "balconet", "triunghi", "bralette-bustiera",
   "clasic-cupa-buretata", "clasic-neburetat-sarma", "multifunctional",
   "cu-burete", "fara-burete", "cu-sarma", "fara-sarma", "brazilian", 
@@ -31,7 +30,11 @@ export const subCategoryEnum = pgEnum("subcategory", [
   "tinute-de-plaja", "scuba", "costume-push-up", "costume-chilot-brazilian",
   "clasici", "boxeri", "pijamale-pentru-barbati", "tricouri", "short-uri", "slipuri",
   "body-si-corset", "chiloti-curvy"
-]);
+]
+
+export const genderEnum = pgEnum("gender", genderArray);
+export const categoryEnum = pgEnum("category", categoryArray);
+export const subCategoryEnum = pgEnum("subcategory", subcategoryArray);
 
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -39,7 +42,7 @@ export const products = pgTable("products", {
   category: categoryEnum("category").notNull(),
   subCategory: subCategoryEnum("subcategory"),
   name: varchar("name", { length: 255 }).notNull(),
-  image: text("image").notNull(),
+  image: text("image"),
   description: text("description"),
   material: varchar("material", { length: 100 }),
   price: integer("price").notNull(), 

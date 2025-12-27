@@ -1,4 +1,5 @@
 import { db } from "#config/database.js"
+import logger from "#config/logger.js";
 import { product_variants } from "#models/product-variant.model.js";
 import { products } from "#models/product.model.js"
 import { count as countFn } from "drizzle-orm"
@@ -65,7 +66,7 @@ export const retrieveAllProducts = async (
         };
 
     } catch (error) {
-        console.error("Error fetching products:", error);
+        logger.error("Error fetching products:", error);
         throw new Error("Could not retrieve products from the database");
     }
 };
@@ -92,7 +93,7 @@ export const retrieveNewArrivals = async (limit=20) => {
       men: menNewest,
     };
   } catch (error) {
-    console.error("Error fetching new arrivals:", error);
+    logger.error("Error fetching new arrivals:", error);
     throw new Error("Could not retrieve new arrivals");
   }
 };
@@ -119,7 +120,63 @@ export const retrieveProductById = async (productId) => {
             varaints,varaints
         };
     } catch (error) {
-        console.error(`Error retrieving product with ID ${productId}:`, error);
+        logger.error(`Error retrieving product with ID ${productId}:`, error);
         throw new Error("Database query failed");
     }
 };
+
+
+
+export const insertProduct = async ({
+    gender,
+    category,
+    subCategory = null,
+    name,
+    image = null,
+    description = null,
+    material = null,
+    price,
+    bigSizes = false,
+}) => {
+    try {
+        const [created] = await db.insert(products).values({
+            gender,
+            category,
+            subCategory,
+            name,
+            image,
+            description,
+            material,
+            price,
+            bigSizes,
+        }).returning();
+
+        return created;
+    } catch (error) {
+        logger.error("Error creating product:", error);
+        throw new Error("Could not create product");
+    }
+};
+
+export const updateProduct = async (id, data) => {
+    try {
+        const [updatedProduct] = await db
+            .update(products)
+            .set({
+                ...data,
+            })
+            .where(eq(products.id, id))
+            .returning();
+
+        if (!updatedProduct) {
+            return null;
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        logger.error(`Error updating product ${id}:`, error);
+        throw new Error("Failed to update product in database");
+    }
+};
+
+

@@ -1,4 +1,11 @@
-import { getNewProducts, getProductById, getProducts } from "#controllers/products.controller.js";
+import { getNewProducts, 
+    getProductById, 
+    getProducts,
+    getProductsAdmin,
+    createProductAdmin,
+    updateProductAdmin,
+    deleteProductAdmin
+} from "#controllers/products.controller.js";
 import { adminRoute } from "#middleware/admin.middleware.js";
 import { authenticateToken } from "#middleware/auth.middleware.js";
 import express from "express";
@@ -13,14 +20,14 @@ router.get("/:id",getProductById)
 
 //admin endpoints
 
-// router.route("/")
-//     .get(adminRoute,getProductsAdmin) // aici sa fac si variante si produs sa fie mai usor cu stocu
-//     .post(adminRoute,createProduct)
+router.route("/admin")
+    .get(authenticateToken,adminRoute,getProductsAdmin) // aici sa fac si variante si produs sa fie mai usor cu stocu
+    .post(authenticateToken,adminRoute,createProductAdmin)
 
-// router.route("/item/:id")
-//     .put(authenticateToken,adminRoute,updateProduct)
-//     .delete(authenticateToken,adminRoute,deleteProduct)
-//     .post(authenticateToken,adminRoute,addImage)
+router.route("/admin/item/:id")
+    .put(authenticateToken,adminRoute,updateProductAdmin)
+    .delete(authenticateToken,adminRoute,deleteProductAdmin)
+    //.post(authenticateToken,adminRoute,addImage)
 
 // router.route("/varaint/:id")
 //     .put(authenticateToken,adminRoute,updateVariant)
