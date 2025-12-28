@@ -282,7 +282,7 @@ export const updateVariantAdmin=async (req,res)=>{
 
         const data={...validationResult.data}
 
-        const updatedVariant=updateVariant(variantId,data)
+        const updatedVariant=await updateVariant(variantId,data)
 
         if(!updatedVariant){
             logger.error('Update returned no variant');
