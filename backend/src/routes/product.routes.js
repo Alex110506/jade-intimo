@@ -28,7 +28,7 @@ router.route("/admin/item/:id")
     .delete(authenticateToken,adminRoute,deleteProductAdmin)
     //.post(authenticateToken,adminRoute,addImage)
 
-router.route("admin/varaint/:id")
+router.route("/admin/variant/:id")
     .put(authenticateToken,adminRoute,updateVariantAdmin)
     .post(authenticateToken,adminRoute,createVariantAdmin)
 

@@ -176,3 +176,71 @@
 {"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
 {"level":"info","message":"Product deleted by admin: Sutien Dantelă Elegance (ID: 1)","service":"user-service"}
 {"level":"info","message":"::1 - - [27/Dec/2025:13:17:25 +0000] \"DELETE /api/products/admin/item/1 HTTP/1.1\" 200 460 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:00:14 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:00:19 +0000] \"POST /api/products/admin/variant/1 HTTP/1.1\" 404 27 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:00:41 +0000] \"POST /api/products/admin/variant/1 HTTP/1.1\" 404 27 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:00:57 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:01:03 +0000] \"POST /api/products/admin/variant/1 HTTP/1.1\" 404 27 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"cause":{"code":"23503","constraint":"product_variants_product_id_products_id_fk","detail":"Key (product_id)=(1) is not present in table \"products\".","file":"ri_triggers.c","line":"2599","name":"NeonDbError","routine":"ri_ReportViolation","schema":"public","severity":"ERROR","table":"product_variants"},"level":"error","message":"Error creating product variant: Failed query: insert into \"product_variants\" (\"id\", \"product_id\", \"size\", \"quantity\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"product_id\", \"size\", \"quantity\", \"created_at\"\nparams: 1,M,3","params":[1,"M",3],"query":"insert into \"product_variants\" (\"id\", \"product_id\", \"size\", \"quantity\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"product_id\", \"size\", \"quantity\", \"created_at\"","service":"user-service","stack":"Error: Failed query: insert into \"product_variants\" (\"id\", \"product_id\", \"size\", \"quantity\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"product_id\", \"size\", \"quantity\", \"created_at\"\nparams: 1,M,3\n    at NeonHttpPreparedQuery.queryWithCache (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/node_modules/drizzle-orm/pg-core/session.js:41:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async NeonHttpPreparedQuery.execute (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/node_modules/drizzle-orm/neon-http/session.js:45:20)\n    at async insertVariant (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/products.service.js:185:25)\n    at async createVariantAdmin (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/controllers/products.controller.js:245:23)"}
+{"level":"error","message":"error creating product variant","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:03:15 +0000] \"POST /api/products/admin/variant/1 HTTP/1.1\" 500 78 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:03:47 +0000] \"GET /api/products/ HTTP/1.1\" 200 134 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product with id 2 created successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:03:53 +0000] \"POST /api/products/admin HTTP/1.1\" 201 449 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product with id 2 created successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:04:01 +0000] \"POST /api/products/admin/variant/2 HTTP/1.1\" 201 140 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:05:48 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"new product 2 added to cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:05:51 +0000] \"POST /api/cart HTTP/1.1\" 200 115 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Increased quantity for item 2 in cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:06:02 +0000] \"POST /api/cart HTTP/1.1\" 200 115 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Increased quantity for item 2 in cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:06:07 +0000] \"POST /api/cart HTTP/1.1\" 200 115 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:06:45 +0000] \"GET /api/cart HTTP/1.1\" 200 196 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:07:01 +0000] \"GET /api/cart HTTP/1.1\" 200 196 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:08:37 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 56 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"error","message":"Error updating product quantity: Cart not found for this user","service":"user-service","stack":"Error: Cart not found for this user\n    at updateProdQuantity (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/cart.service.js:166:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:08:56 +0000] \"GET /api/cart HTTP/1.1\" 200 196 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:12:53 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 56 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"error","message":"Error updating product quantity: Cart not found for this user","service":"user-service","stack":"Error: Cart not found for this user\n    at updateProdQuantity (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/cart.service.js:167:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"}
+{"level":"info","message":"user logged in:","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:14:25 +0000] \"POST /api/auth/login HTTP/1.1\" 200 155 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:14:29 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 56 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"error","message":"Error updating product quantity: Cart not found for this user","service":"user-service","stack":"Error: Cart not found for this user\n    at updateProdQuantity (file:///home/alexr/Desktop/coding-projects/jade-intimo/backend/src/services/cart.service.js:167:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:16:49 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 156 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:16:58 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 156 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:17:00 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 156 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:17:04 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 153 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:17:08 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 153 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:17:12 +0000] \"PATCH /api/cart/2 HTTP/1.1\" 200 156 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product variant 2 removed from cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:17:48 +0000] \"DELETE /api/cart/2 HTTP/1.1\" 200 130 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"warn","message":"Attempted to delete non-existent item: Variant 2 in Cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:18:03 +0000] \"DELETE /api/cart/2 HTTP/1.1\" 200 60 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"new product 2 added to cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [28/Dec/2025:23:18:15 +0000] \"POST /api/cart HTTP/1.1\" 200 115 \"-\" \"PostmanRuntime/7.51.0\"","service":"user-service"}

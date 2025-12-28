@@ -160,24 +160,33 @@ export const updateProdQuantity=async (userId,variantId,nr)=>{
         const [cart] = await db
             .select({ id: carts.id })
             .from(carts)
-            .where(eq(carts.user_id, userId));
+            .where(eq(carts.user_id, userId))
+            .limit(1);
 
         if (!cart) {
             throw new Error("Cart not found for this user");
         }
 
-        const [item]=await db
+        const [item] = await db
             .select()
             .from(cart_items)
             .where(
                 and(
-                    eq(cart_items.variant_id,variantId),
-                    eq(cart_items.cart_id,cart.id)
-                )
+                    eq(cart_items.variant_id, variantId),
+                    eq(cart_items.cart_id, cart.id)
+                ) 
             )
-            .returning()
+            .limit(1);
 
-        if(nr<0 && item.quantity===1){
+        if (!item) {
+            throw new Error("Item not found in cart");
+        }
+        const delta = nr > 0 ? 1 : nr < 0 ? -1 : 0;
+        if (delta === 0) {
+            return { action: "noop", item, cartId: cart.id };
+        }
+
+        if (delta < 0 && item.quantity === 1) {
             const [deletedItem] = await db
                 .delete(cart_items)
                 .where(
@@ -194,11 +203,11 @@ export const updateProdQuantity=async (userId,variantId,nr)=>{
             };
         }
 
+        const newQuantity = item.quantity + (delta);
+
         const [updatedItem] = await db
             .update(cart_items)
-            .set({
-                quantity: sql`${cart_items.quantity} + ${Number(nr>=0 ? 1 : -1)}`
-            })
+            .set({ quantity: newQuantity })
             .where(eq(cart_items.id, item.id))
             .returning();
 

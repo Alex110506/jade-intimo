@@ -15,6 +15,13 @@
       "when": 1766839229241,
       "tag": "0001_smiling_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766963068782,
+      "tag": "0002_opposite_whizzer",
+      "breakpoints": true
     }
   ]
 }

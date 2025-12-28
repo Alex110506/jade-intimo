@@ -42,10 +42,11 @@ export const addToCart=async (req,res)=>{
 
 export const updateQuantity=async (req,res)=>{
     try {
-        const {userId}=req.user.id
-        const {variantId,nr}=req.body
-        
-        const data=updateProdQuantity(userId,variantId,nr)
+        const userId = req.user.id
+        const variantId = Number(req.params.id)
+        const { nr } = req.body
+
+        const data = await updateProdQuantity(userId, variantId, nr)
 
         res.status(200).json({
             message:"Item in cart updated sucessfully",
@@ -62,10 +63,10 @@ export const updateQuantity=async (req,res)=>{
 
 export const removeItem=async (req,res)=>{
     try {
-        const {userId}=req.user.id
-        const {variantId}=req.body
+        const userId = req.user.id
+        const variantId = Number(req.params.id)
 
-        const data=await deleteProduct(userId,variantId)
+        const data = await deleteProduct(userId, variantId)
 
         res.status(200).json({
             message:"Item removed from cart sucessfully",
