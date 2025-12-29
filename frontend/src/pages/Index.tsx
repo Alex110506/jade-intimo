@@ -4,7 +4,6 @@ import Hero from '@/components/home/Hero';
 import FeaturedCategories from '@/components/home/FeaturedCategories';
 import NewArrivals from '@/components/home/NewArrivals';
 import Bestsellers from '@/components/home/Bestsellers';
-import PromoBanner from '@/components/home/PromoBanner';
 import SEO from '@/components/SEO';
 
 const Index = () => {
@@ -39,7 +38,6 @@ const Index = () => {
           <Hero />
           <FeaturedCategories />
           <NewArrivals />
-          <PromoBanner />
           <Bestsellers />
         </main>
         <Footer />

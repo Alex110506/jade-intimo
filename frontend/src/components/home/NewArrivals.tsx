@@ -33,7 +33,7 @@ const NewArrivals = () => {
             </p>
           </div>
           <a
-            href={`/${gender}/new`}
+            href={`/${gender}/noutati`}
             className="text-sm font-medium uppercase tracking-wider text-foreground underline underline-offset-4 transition-opacity hover:opacity-70"
           >
             View All

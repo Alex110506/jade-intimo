@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-border bg-secondary/30">
       <div className="container-custom py-16">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
           {/* Brand */}
           <div className="lg:col-span-1">
             <h2 className="font-heading text-2xl font-semibold tracking-wide">Jade Intimo</h2>
@@ -23,38 +23,6 @@ const Footer = () => {
                 <Twitter size={20} />
               </a>
             </div>
-          </div>
-
-          {/* Shop */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Shop</h3>
-            <ul className="mt-4 space-y-3">
-              <li>
-                <Link to="/women/new" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  New Arrivals
-                </Link>
-              </li>
-              <li>
-                <Link to="/women/bras" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Bras
-                </Link>
-              </li>
-              <li>
-                <Link to="/women/lingerie" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Lingerie
-                </Link>
-              </li>
-              <li>
-                <Link to="/women/pajamas" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Sleepwear
-                </Link>
-              </li>
-              <li>
-                <Link to="/women/bathing-suits" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Swimwear
-                </Link>
-              </li>
-            </ul>
           </div>
 
           {/* Help */}

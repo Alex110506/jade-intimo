@@ -10,6 +10,7 @@ import categoryLingerie from '@/assets/category-lingerie.jpg';
 import categoryPajamas from '@/assets/category-pajamas.jpg';
 import categorySwimwear from '@/assets/category-swimwear.jpg';
 import categoryMenUnderwear from '@/assets/category-men-underwear.jpg';
+import { useEffect } from 'react';
 
 const categoryImages: Record<string, string> = {
   bras: categoryBras,
@@ -37,6 +38,14 @@ const GenderPage = () => {
       { '@type': 'ListItem', position: 2, name: isWomen ? 'Women' : 'Men', item: `https://jade-intimo.com/${gender}` },
     ],
   };
+
+  useEffect(()=>{
+    try {
+      
+    } catch (error) {
+      
+    }
+  },[])
 
   return (
     <>

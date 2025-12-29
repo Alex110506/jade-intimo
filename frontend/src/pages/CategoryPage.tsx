@@ -1,7 +1,7 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight, SlidersHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ProductGrid from '@/components/products/ProductGrid';
@@ -9,164 +9,144 @@ import SEO from '@/components/SEO';
 import { products, womenCategories, menCategories } from '@/data/products';
 
 const CategoryPage = () => {
-  const { category } = useParams<{ category: string }>();
+  // 1. Get both category and subcategory from URL
+  const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
   const location = useLocation();
   const [sortBy, setSortBy] = useState('newest');
   
-  // Extract gender from the URL path
   const gender = location.pathname.startsWith('/women') ? 'women' : 'men';
-  const isWomen = gender === 'women';
-  const categories = isWomen ? womenCategories : menCategories;
+  const categories = gender === 'women' ? womenCategories : menCategories;
 
+  // 2. Find Category and Subcategory objects for metadata
   const currentCategory = categories.find((c) => c.slug === category);
+  
+  // If your data structure has nested subcategories inside the category object:
+  const currentSubcategory = currentCategory?.subcategories?.find(
+    (sub: any) => sub.slug === subcategory
+  );
 
-  // Filter products
-  let filteredProducts = products.filter((p) => p.gender === gender);
+  const displayName = currentSubcategory?.name || currentCategory?.name || 'Products';
 
-  if (category === 'new') {
-    filteredProducts = filteredProducts.filter((p) => p.isNew);
-  } else if (category && category !== 'all') {
-    filteredProducts = filteredProducts.filter((p) => p.category === category);
-  }
+  // 3. Optimized Product Filtering
+  const sortedProducts = useMemo(() => {
+    let filtered = products.filter((p) => p.gender === gender);
 
-  // If no products match, show all for that gender
-  if (filteredProducts.length === 0) {
-    filteredProducts = products.filter((p) => p.gender === gender);
-  }
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'name':
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
+    if (category === 'new') {
+      filtered = filtered.filter((p) => p.isNew);
+    } else if (category && category !== 'all') {
+      // Filter by main category
+      filtered = filtered.filter((p) => p.category === category);
+      
+      // New: Filter by subcategory if it exists in the URL
+      if (subcategory) {
+        filtered = filtered.filter((p) => p.subcategory === subcategory);
+      }
     }
-  });
 
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jade-intimo.com' },
-      { '@type': 'ListItem', position: 2, name: isWomen ? 'Women' : 'Men', item: `https://jade-intimo.com/${gender}` },
-      { '@type': 'ListItem', position: 3, name: currentCategory?.name || 'Products', item: `https://jade-intimo.com/${gender}/${category}` },
-    ],
-  };
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low': return a.price - b.price;
+        case 'price-high': return b.price - a.price;
+        case 'name': return a.name.localeCompare(b.name);
+        default: return 0;
+      }
+    });
+  }, [gender, category, subcategory, sortBy]);
 
-  const productListSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: currentCategory?.name || 'Products',
-    numberOfItems: sortedProducts.length,
-    itemListElement: sortedProducts.slice(0, 10).map((product, index) => ({
+  // 4. Update Breadcrumb Schema for SEO
+  const breadcrumbElements = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jade-intimo.com' },
+    { '@type': 'ListItem', position: 2, name: gender.charAt(0).toUpperCase() + gender.slice(1), item: `https://jade-intimo.com/${gender}` },
+    { '@type': 'ListItem', position: 3, name: currentCategory?.name || 'All', item: `https://jade-intimo.com/${gender}/${category}` },
+  ];
+
+  if (subcategory && currentSubcategory) {
+    breadcrumbElements.push({
       '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Product',
-        name: product.name,
-        image: product.image,
-        offers: {
-          '@type': 'Offer',
-          price: product.price,
-          priceCurrency: 'USD',
-          availability: 'https://schema.org/InStock',
-        },
-      },
-    })),
-  };
+      position: 4,
+      name: currentSubcategory.name,
+      item: `https://jade-intimo.com/${gender}/${category}/${subcategory}`,
+    });
+  }
 
   return (
     <>
       <SEO
-        title={currentCategory?.name || 'Products'}
-        description={`Shop ${currentCategory?.name?.toLowerCase() || 'products'} at Jade Intimo. ${currentCategory?.description || 'Premium quality intimates and loungewear.'}`}
-        keywords={`${currentCategory?.name?.toLowerCase()}, ${gender} ${currentCategory?.name?.toLowerCase()}, buy ${currentCategory?.name?.toLowerCase()}`}
-        url={`https://jade-intimo.com/${gender}/${category}`}
-        schema={breadcrumbSchema}
+        title={displayName}
+        description={`Shop ${displayName.toLowerCase()} at Jade Intimo.`}
+        url={`https://jade-intimo.com/${gender}/${category}${subcategory ? `/${subcategory}` : ''}`}
+        schema={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: breadcrumbElements }}
       />
+      
       <div className="min-h-screen">
         <Navbar />
-        <main role="main" className="pt-[105px]">
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="border-b border-border bg-secondary/30">
+        <main className="pt-[105px]">
+          {/* Breadcrumbs UI */}
+          <nav className="border-b border-border bg-secondary/30">
             <div className="container-custom py-4">
-              <ol className="flex items-center gap-2 text-sm" itemScope itemType="https://schema.org/BreadcrumbList">
-                <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                  <Link to="/" className="text-muted-foreground transition-colors hover:text-foreground" itemProp="item">
-                    <span itemProp="name">Home</span>
+              <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+                <li><Link to="/" className="hover:text-foreground">Home</Link></li>
+                <ChevronRight size={14} />
+                <li><Link to={`/${gender}`} className="capitalize hover:text-foreground">{gender}</Link></li>
+                <ChevronRight size={14} />
+                {/* Main Category Link */}
+                <li>
+                  <Link 
+                    to={`/${gender}/${category}`} 
+                    className={`${!subcategory ? 'font-medium text-foreground' : 'hover:text-foreground'}`}
+                  >
+                    {currentCategory?.name || 'Products'}
                   </Link>
-                  <meta itemProp="position" content="1" />
                 </li>
-                <ChevronRight size={14} className="text-muted-foreground" aria-hidden="true" />
-                <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                  <Link to={`/${gender}`} className="text-muted-foreground capitalize transition-colors hover:text-foreground" itemProp="item">
-                    <span itemProp="name">{gender}</span>
-                  </Link>
-                  <meta itemProp="position" content="2" />
-                </li>
-                <ChevronRight size={14} className="text-muted-foreground" aria-hidden="true" />
-                <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                  <span className="font-medium" itemProp="name">{currentCategory?.name || 'All Products'}</span>
-                  <meta itemProp="position" content="3" />
-                </li>
+                {/* Conditional Subcategory Link */}
+                {subcategory && (
+                  <>
+                    <ChevronRight size={14} />
+                    <li className="font-medium text-foreground">{currentSubcategory?.name || subcategory}</li>
+                  </>
+                )}
               </ol>
             </div>
           </nav>
 
           <div className="container-custom py-8">
-            {/* Header */}
             <header>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+              <motion.h1 
+                key={displayName}
+                initial={{ opacity: 0, x: -10 }} 
+                animate={{ opacity: 1, x: 0 }}
                 className="font-heading text-3xl font-semibold md:text-4xl"
               >
-                {currentCategory?.name || 'All Products'}
+                {displayName}
               </motion.h1>
-              {currentCategory?.description && (
-                <p className="mt-2 text-muted-foreground">{currentCategory.description}</p>
-              )}
+              <p className="mt-2 text-muted-foreground">
+                {currentCategory?.description || `Explore our latest ${displayName.toLowerCase()}.`}
+              </p>
             </header>
 
             {/* Filters Bar */}
-            <div className="my-8 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="my-8 flex items-center justify-between border-b border-border pb-6">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium">{sortedProducts.length}</span> products
+                <span className="font-medium text-foreground">{sortedProducts.length}</span> products
               </p>
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 text-sm font-medium transition-opacity hover:opacity-70" aria-label="Filter products">
-                  <SlidersHorizontal size={16} aria-hidden="true" />
-                  Filters
+                <button className="flex items-center gap-2 text-sm font-medium">
+                  <SlidersHorizontal size={16} /> Filters
                 </button>
-                <label htmlFor="sort-select" className="sr-only">Sort by</label>
-                <select
-                  id="sort-select"
-                  value={sortBy}
+                <select 
+                  value={sortBy} 
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border-none bg-transparent text-sm font-medium focus:outline-none focus:ring-0"
+                  className="bg-transparent text-sm font-medium focus:outline-none"
                 >
                   <option value="newest">Newest</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="name">Name</option>
+                  <option value="price-low">Price: Low-High</option>
+                  <option value="price-high">Price: High-Low</option>
                 </select>
               </div>
             </div>
 
-            {/* Products Grid */}
-            <section aria-labelledby="products-heading">
-              <h2 id="products-heading" className="sr-only">{currentCategory?.name || 'Products'}</h2>
-              <ProductGrid products={sortedProducts} />
-            </section>
+            <ProductGrid products={sortedProducts} />
           </div>
-
-          {/* Product List Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListSchema) }} />
         </main>
         <Footer />
       </div>

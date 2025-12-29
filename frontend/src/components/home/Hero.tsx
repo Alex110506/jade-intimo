@@ -59,12 +59,12 @@ const Hero = () => {
               : 'Premium essentials crafted for the modern man. Comfort meets sophistication.'}
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link to={`/${gender}/new`} className="btn-primary inline-flex items-center gap-2">
+            <Link to={`/${gender}/noutati`} className="btn-primary inline-flex items-center gap-2">
               Shop New Arrivals
               <ArrowRight size={16} />
             </Link>
             <Link to={`/${gender}`} className="btn-secondary">
-              Explore Collection
+              Explore Categories
             </Link>
           </div>
         </motion.div>
