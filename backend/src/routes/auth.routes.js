@@ -5,7 +5,8 @@ import {
   logoutController,
   updateDataController,
   addAddressController,
-  updateAddressController
+  updateAddressController,
+  getAddressController
 } from '#controllers/auth.controller.js';
 import { authenticateToken } from '#middleware/auth.middleware.js';
 
@@ -17,6 +18,7 @@ router.post('/logout', authenticateToken, logoutController);
 
 router.put('/updateData', authenticateToken, updateDataController);
 
+router.get("/getAddress",authenticateToken,getAddressController)
 router.post("/addAddress",authenticateToken,addAddressController)
 router.put("/updateAddress",authenticateToken,updateAddressController)
 

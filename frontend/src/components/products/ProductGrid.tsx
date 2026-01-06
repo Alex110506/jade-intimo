@@ -1,24 +1,28 @@
 import { motion } from 'framer-motion';
-import { Product } from '@/data/products';
 import ProductCard from './ProductCard';
 
 interface ProductGridProps {
-  products: Product[];
+  products: any; // Ideally this should be Product[]
   title?: string;
   description?: string;
 }
 
 const ProductGrid = ({ products, title, description }: ProductGridProps) => {
-  if (products.length === 0) {
+  // Defensive check: Ensure products is an array before checking length or mapping
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  if (safeProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h3 className="font-heading text-xl font-medium">No products found</h3>
+        <h3 className="font-heading text-xl font-medium">Nu am gasit produse</h3>
         <p className="mt-2 text-muted-foreground">
-          Try adjusting your filters or check back later.
+          Incercati sa schimbati filtrele sau reveniti mai tarziu.
         </p>
       </div>
     );
   }
+
+  console.log(products)
 
   return (
     <div>
@@ -41,9 +45,9 @@ const ProductGrid = ({ products, title, description }: ProductGridProps) => {
       )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product, index) => (
+        {safeProducts.map((product, index) => (
           <motion.div
-            key={product.id}
+            key={product.id || product._id || index} // Added fallbacks for keys
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.05 }}

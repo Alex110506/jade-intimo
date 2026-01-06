@@ -17,6 +17,9 @@ import {
 import { jwttoken } from '#utils/jwt.js';
 import { formatValidationError } from '#utils/format.js';
 import { cookies } from '#utils/cookies.js';
+import { db } from '#config/database.js';
+import { addresses } from '#models/adress.model.js';
+import { eq } from 'drizzle-orm';
 
 export const signupController = async (req, res) => {
   try {
@@ -239,6 +242,44 @@ export const updateAddressController=async (req,res)=>{
     });
   } catch (error) {
     logger.error('address update error', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getAddressController = async (req, res) => {
+  try {
+    const user_id = req.user && req.user.id;
+
+    if (!user_id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const result = await db
+      .select()
+      .from(addresses)
+      .where(eq(addresses.user_id, user_id))
+      .limit(1);
+
+    const address = result[0];
+
+    if (!address) {
+      return res.status(200).json({ address: null });
+    }
+
+    return res.status(200).json({
+      address: {
+        id: address.id,
+        user_id: address.user_id,
+        address_line: address.address_line,
+        city: address.city,
+        state: address.state,
+        postal_code: address.postal_code,
+        country: address.country,
+        created_at: address.created_at,
+      },
+    });
+  } catch (error) {
+    logger.error('get address error', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

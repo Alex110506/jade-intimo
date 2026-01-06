@@ -1,18 +1,23 @@
 import { motion } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
-import { products } from '@/data/products';
 import ProductCard from '@/components/products/ProductCard';
 
-const NewArrivals = () => {
+const NewArrivals = ({ products }) => {
   const { gender } = useGender();
-  const newProducts = products.filter(
-    (p) => p.gender === gender && p.isNew
-  ).slice(0, 4);
 
-  // If no new products for this gender, show first 4 products
-  const displayProducts = newProducts.length > 0 
-    ? newProducts 
-    : products.filter(p => p.gender === gender).slice(0, 4);
+  // Don't render until products are available
+  if (!products) return null;
+
+  // products may be an object with `women`/`men` or an array of products.
+  let genderProducts = [];
+  if (Array.isArray(products)) {
+    genderProducts = products.filter((p) => p.gender === gender);
+  } else {
+    genderProducts = gender === 'women' ? (products.women || []) : (products.men || []);
+  }
+
+  const displayProducts = genderProducts.slice(0, 4);
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="section-padding bg-secondary/30">
@@ -26,24 +31,24 @@ const NewArrivals = () => {
         >
           <div>
             <h2 className="font-heading text-3xl font-semibold md:text-4xl">
-              New Arrivals
+              Noutăți
             </h2>
             <p className="mt-2 text-muted-foreground">
-              The latest additions to our collection
+              Cele mai recente adăugiri în colecția noastră
             </p>
           </div>
           <a
             href={`/${gender}/noutati`}
             className="text-sm font-medium uppercase tracking-wider text-foreground underline underline-offset-4 transition-opacity hover:opacity-70"
           >
-            View All
+            Vezi Tot
           </a>
         </motion.div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {displayProducts.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product.id || product._id} // Support both standard id or mongo _id
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

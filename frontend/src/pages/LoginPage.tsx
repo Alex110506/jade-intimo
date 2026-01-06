@@ -6,6 +6,8 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { toast } from 'sonner';
 import useAuthStore from "@/hooks/use-authstore"; // Import your Zustand store
+import { useCartStore, CartItem } from "@/hooks/use-cartstore.ts"; // Importă store-ul de coș
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,14 +24,16 @@ const LoginPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
+  const useCart=useCartStore()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
     const payload = isLogin 
       ? { email, password } 
-      : { email, password, phone, firstName, lastName };
+      : { email, password, phone, first_name:firstName, last_name:lastName };
 
     try {
       const response = await fetch(`http://localhost:3000${endpoint}`, {
@@ -49,6 +53,8 @@ const LoginPage = () => {
       
       toast.success(isLogin ? `Welcome back, ${data.user.first_name || 'User'}!` : 'Account created successfully!');
       navigate("/");
+      localStorage.clear()
+      location.reload()
 
     } catch (error: any) {
       toast.error(error.message);

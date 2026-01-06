@@ -35,36 +35,33 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="max-w-xl"
         >
-          <span className="mb-4 inline-block text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
-            New Collection
-          </span>
           <h1 className="font-heading text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
             {gender === 'women' ? (
               <>
-                Embrace Your
+                Stilul Tău,
                 <br />
-                <span className="text-pink-accent">jade-intimo</span>
+                <span className="text-pink-accent">Încrederea Ta</span>
               </>
             ) : (
               <>
-                Redefine
+                Design Modern,
                 <br />
-                <span className="text-pink-accent">Comfort</span>
+                <span className="text-pink-accent">Calitate Pură</span>
               </>
             )}
           </h1>
           <p className="mt-6 text-base text-muted-foreground md:text-lg">
             {gender === 'women'
-              ? 'Discover our curated collection of luxurious intimates designed to make you feel confident and beautiful.'
-              : 'Premium essentials crafted for the modern man. Comfort meets sophistication.'}
+              ? 'Descoperă colecția noastră de lenjerie si îmbrăcăminte, creată special pentru a te face să te simți încrezătoare și frumoasă în fiecare zi.'
+              : 'Piese esențiale premium, create pentru bărbatul modern. Unde confortul absolut întâlnește rafinamentul.'}
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={`/${gender}/noutati`} className="btn-primary inline-flex items-center gap-2">
-              Shop New Arrivals
+              Descoperă Noutățile
               <ArrowRight size={16} />
             </Link>
             <Link to={`/${gender}`} className="btn-secondary">
-              Explore Categories
+              Explorează categoriile
             </Link>
           </div>
         </motion.div>

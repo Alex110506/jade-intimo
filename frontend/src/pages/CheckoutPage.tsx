@@ -4,16 +4,24 @@ import { motion } from 'framer-motion';
 import { ChevronRight, Check, CreditCard, Truck, MapPin } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
+
+// 1. Import Zustand Store instead of Context
+import { useCartStore } from '@/hooks/use-cartstore';
 
 type Step = 'shipping' | 'payment' | 'review';
 
 const CheckoutPage = () => {
-  const { items, totalPrice, clearCart } = useCart();
+  // 2. Use Zustand hooks
+  const { cart, clearCart } = useCartStore();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // 3. Calculate Totals Locally (since Zustand stores raw data)
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) / 100;
+  const shippingCost = cartTotal > 100 ? 0 : 9.99;
+  const finalTotal = cartTotal + shippingCost;
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: '',
@@ -34,9 +42,6 @@ const CheckoutPage = () => {
     cvv: '',
   });
 
-  const shippingCost = totalPrice > 100 ? 0 : 9.99;
-  const finalTotal = totalPrice + shippingCost;
-
   const steps: { key: Step; label: string; icon: React.ElementType }[] = [
     { key: 'shipping', label: 'Shipping', icon: MapPin },
     { key: 'payment', label: 'Payment', icon: CreditCard },
@@ -55,14 +60,19 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
-    // Simulate order processing
+    
+    // NOTE: Here you would ideally make a POST request to your backend to create the order
+    // e.g., await fetch('/api/orders', { method: 'POST', body: ... })
+
+    // Simulate order processing for now
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    clearCart();
+    
+    clearCart(); // Clear Zustand store
     toast.success('Order placed successfully!');
     navigate('/');
   };
 
-  if (items.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -407,8 +417,8 @@ const CheckoutPage = () => {
                   <div className="border border-border p-6">
                     <h3 className="font-medium">Order Items</h3>
                     <div className="mt-4 space-y-4">
-                      {items.map((item) => (
-                        <div key={item.id} className="flex gap-4">
+                      {cart.map((item) => (
+                        <div key={item.variantId} className="flex gap-4">
                           <div className="h-16 w-12 overflow-hidden bg-secondary">
                             <img
                               src={item.image}
@@ -418,12 +428,16 @@ const CheckoutPage = () => {
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium">{item.name}</p>
+                            {item.size && (
+                                <p className="text-xs text-muted-foreground">Size: {item.size}</p>
+                            )}
                             <p className="text-xs text-muted-foreground">
                               Qty: {item.quantity}
                             </p>
                           </div>
+                          {/* Price formatting fixed */}
                           <p className="text-sm font-medium">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ${((item.price * item.quantity) / 100).toFixed(2)}
                           </p>
                         </div>
                       ))}
@@ -450,14 +464,14 @@ const CheckoutPage = () => {
               )}
             </div>
 
-            {/* Order Summary */}
+            {/* Order Summary Sidebar */}
             <div>
               <div className="sticky top-32 bg-secondary/50 p-6">
                 <h2 className="font-heading text-xl font-semibold">Order Summary</h2>
 
                 <div className="mt-6 space-y-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
+                  {cart.map((item) => (
+                    <div key={item.variantId} className="flex gap-4">
                       <div className="h-16 w-12 overflow-hidden bg-secondary">
                         <img
                           src={item.image}
@@ -467,12 +481,14 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">{item.name}</p>
+                        {item.size && <p className="text-xs text-muted-foreground">Size: {item.size}</p>}
                         <p className="text-xs text-muted-foreground">
                           Qty: {item.quantity}
                         </p>
                       </div>
+                      {/* Price formatting fixed */}
                       <p className="text-sm font-medium">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${((item.price * item.quantity) / 100).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -483,7 +499,7 @@ const CheckoutPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>${cartTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>

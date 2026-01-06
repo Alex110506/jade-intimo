@@ -1,108 +1,116 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, SlidersHorizontal } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { ChevronRight, Loader2, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ProductGrid from '@/components/products/ProductGrid';
 import SEO from '@/components/SEO';
-import { products, womenCategories, menCategories } from '@/data/products';
+import { womenCategories, menCategories } from '@/data/products';
 
 const CategoryPage = () => {
-  // 1. Get both category and subcategory from URL
   const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
   const location = useLocation();
+  
+  // UI States
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Filter States
   const [sortBy, setSortBy] = useState('newest');
   
+  // Data & Pagination States
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+
   const gender = location.pathname.startsWith('/women') ? 'women' : 'men';
   const categories = gender === 'women' ? womenCategories : menCategories;
-
-  // 2. Find Category and Subcategory objects for metadata
   const currentCategory = categories.find((c) => c.slug === category);
-  
-  // If your data structure has nested subcategories inside the category object:
-  const currentSubcategory = currentCategory?.subcategories?.find(
-    (sub: any) => sub.slug === subcategory
-  );
 
-  const displayName = currentSubcategory?.name || currentCategory?.name || 'Products';
+  // Reset page to 1 if the category or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, subcategory, sortBy, gender]);
 
-  // 3. Optimized Product Filtering
-  const sortedProducts = useMemo(() => {
-    let filtered = products.filter((p) => p.gender === gender);
-
-    if (category === 'new') {
-      filtered = filtered.filter((p) => p.isNew);
-    } else if (category && category !== 'all') {
-      // Filter by main category
-      filtered = filtered.filter((p) => p.category === category);
+  // Main Data Fetching Effect
+  useEffect(() => {
+    const fetchFilteredProducts = async () => {
+      setIsLoading(true);
       
-      // New: Filter by subcategory if it exists in the URL
-      if (subcategory) {
-        filtered = filtered.filter((p) => p.subcategory === subcategory);
+      const params = new URLSearchParams();
+      // Filters
+      if (category && category !== 'all') params.append('category', category);
+      if (subcategory) params.append('subCategory', subcategory);
+      params.append('gender', gender);
+      params.append('sortBy', sortBy);
+      
+      // Pagination Params
+      params.append('page', currentPage.toString());
+      params.append('limit', itemsPerPage.toString());
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/products?${params.toString()}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch');
+        
+        const data = await response.json();
+        
+        // 1. Set Products (Handle backend response structure)
+        setCategoryProducts(data.products || []);
+        
+        // 2. Set Pagination Data
+        if (data.pagination) {
+          setTotalItems(data.pagination.totalItems);
+          setTotalPages(data.pagination.totalPages);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setCategoryProducts([]); // Fallback to empty to prevent UI crash
+      } finally {
+        setIsLoading(false);
       }
+    };
+
+    fetchFilteredProducts();
+    
+    // Scroll to top of grid when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+  }, [category, subcategory, sortBy, gender, currentPage, itemsPerPage]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
-
-    return [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low': return a.price - b.price;
-        case 'price-high': return b.price - a.price;
-        case 'name': return a.name.localeCompare(b.name);
-        default: return 0;
-      }
-    });
-  }, [gender, category, subcategory, sortBy]);
-
-  // 4. Update Breadcrumb Schema for SEO
-  const breadcrumbElements = [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jade-intimo.com' },
-    { '@type': 'ListItem', position: 2, name: gender.charAt(0).toUpperCase() + gender.slice(1), item: `https://jade-intimo.com/${gender}` },
-    { '@type': 'ListItem', position: 3, name: currentCategory?.name || 'All', item: `https://jade-intimo.com/${gender}/${category}` },
-  ];
-
-  if (subcategory && currentSubcategory) {
-    breadcrumbElements.push({
-      '@type': 'ListItem',
-      position: 4,
-      name: currentSubcategory.name,
-      item: `https://jade-intimo.com/${gender}/${category}/${subcategory}`,
-    });
-  }
+  };
 
   return (
     <>
-      <SEO
-        title={displayName}
-        description={`Shop ${displayName.toLowerCase()} at Jade Intimo.`}
-        url={`https://jade-intimo.com/${gender}/${category}${subcategory ? `/${subcategory}` : ''}`}
-        schema={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: breadcrumbElements }}
-      />
+      <SEO title={subcategory ? `${subcategory} - Jade Intimo` : `${currentCategory?.name || category} - Jade Intimo`} />
       
       <div className="min-h-screen">
         <Navbar />
         <main className="pt-[105px]">
-          {/* Breadcrumbs UI */}
+          {/* Breadcrumbs */}
           <nav className="border-b border-border bg-secondary/30">
             <div className="container-custom py-4">
               <ol className="flex items-center gap-2 text-sm text-muted-foreground">
                 <li><Link to="/" className="hover:text-foreground">Home</Link></li>
                 <ChevronRight size={14} />
-                <li><Link to={`/${gender}`} className="capitalize hover:text-foreground">{gender}</Link></li>
+                <li className="capitalize"><Link to={`/${gender}`}>{gender}</Link></li>
                 <ChevronRight size={14} />
-                {/* Main Category Link */}
-                <li>
-                  <Link 
-                    to={`/${gender}/${category}`} 
-                    className={`${!subcategory ? 'font-medium text-foreground' : 'hover:text-foreground'}`}
-                  >
-                    {currentCategory?.name || 'Products'}
-                  </Link>
+                <li className={!subcategory ? "font-medium text-foreground" : ""}>
+                  <Link to={`/${gender}/${category}`}>{currentCategory?.name || category}</Link>
                 </li>
-                {/* Conditional Subcategory Link */}
                 {subcategory && (
                   <>
                     <ChevronRight size={14} />
-                    <li className="font-medium text-foreground">{currentSubcategory?.name || subcategory}</li>
+                    <li className="font-medium text-foreground capitalize">{subcategory.replace(/-/g, ' ')}</li>
                   </>
                 )}
               </ol>
@@ -110,42 +118,81 @@ const CategoryPage = () => {
           </nav>
 
           <div className="container-custom py-8">
-            <header>
-              <motion.h1 
-                key={displayName}
-                initial={{ opacity: 0, x: -10 }} 
-                animate={{ opacity: 1, x: 0 }}
-                className="font-heading text-3xl font-semibold md:text-4xl"
-              >
-                {displayName}
-              </motion.h1>
-              <p className="mt-2 text-muted-foreground">
-                {currentCategory?.description || `Explore our latest ${displayName.toLowerCase()}.`}
-              </p>
-            </header>
-
-            {/* Filters Bar */}
-            <div className="my-8 flex items-center justify-between border-b border-border pb-6">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{sortedProducts.length}</span> products
-              </p>
-              <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 text-sm font-medium">
-                  <SlidersHorizontal size={16} /> Filters
-                </button>
-                <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-sm font-medium focus:outline-none"
+            <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div>
+                <motion.h1 
+                  key={`${category}-${subcategory}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="font-heading text-3xl font-semibold md:text-4xl capitalize"
                 >
-                  <option value="newest">Newest</option>
-                  <option value="price-low">Price: Low-High</option>
-                  <option value="price-high">Price: High-Low</option>
+                  {subcategory ? subcategory.replace(/-/g, ' ') : (currentCategory?.name || category)}
+                </motion.h1>
+                <p className="mt-2 text-muted-foreground">
+                  {currentCategory?.description || `Colecție premium de ${gender}.`}
+                </p>
+              </div>
+
+              {/* Sort Dropdown */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sortează</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border-b border-foreground bg-transparent py-1 text-sm font-medium focus:outline-none"
+                >
+                  <option value="newest">Noutăți</option>
+                  <option value="price-low-high">Preț: Mic - Mare</option>
+                  <option value="price-high-low">Preț: Mare - Mic</option>
+                  <option value="best-selling">Cele mai vândute</option>
                 </select>
               </div>
+            </header>
+
+            {/* Results Info Bar */}
+            <div className="my-8 flex items-center justify-between border-b border-border pb-4">
+               <p className="text-sm text-muted-foreground italic">
+                Afișare: <span className="font-medium text-foreground">{categoryProducts.length}</span> din <span className="font-medium text-foreground">{totalItems}</span> produse
+              </p>
             </div>
 
-            <ProductGrid products={sortedProducts} />
+            {/* Grid Area */}
+            <section className="relative min-h-[400px]">
+              {isLoading && (
+                <div className="absolute inset-0 z-10 flex items-start justify-center bg-background/50 pt-20 backdrop-blur-[2px]">
+                  <Loader2 className="animate-spin text-primary" size={40} />
+                </div>
+              )}
+              
+              <ProductGrid products={categoryProducts} />
+              
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-12 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1 || isLoading}
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background transition-colors hover:bg-accent disabled:opacity-50"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  
+                  {/* Simple page indicator: Page 1 of 5 */}
+                  <span className="text-sm font-medium">
+                    Pagina {currentPage} din {totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages || isLoading}
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background transition-colors hover:bg-accent disabled:opacity-50"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </section>
           </div>
         </main>
         <Footer />

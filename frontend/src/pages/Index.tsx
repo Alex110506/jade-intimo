@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useProductStore } from '@/hooks/use-productstore';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
@@ -7,19 +9,50 @@ import Bestsellers from '@/components/home/Bestsellers';
 import SEO from '@/components/SEO';
 
 const Index = () => {
+  const { 
+    newArrivals, 
+    bestSellers, 
+    setNewArrivals, 
+    setBestSellers 
+  } = useProductStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch New Products only if not yet fetched
+        if (newArrivals == null) {
+          const newRes = await fetch('http://localhost:3000/api/products/new');
+          const newData = await newRes.json();
+          // store the payload's products (handle either shape)
+          setNewArrivals(newData.products ?? newData);
+        }
+
+        // 2. Fetch Bestsellers only if not yet fetched
+        if (bestSellers == null) {
+          const bestRes = await fetch('http://localhost:3000/api/products?limit=4&sortBy=best-selling');
+          const bestData = await bestRes.json();
+          setBestSellers(bestData.products ?? bestData);
+        }
+      } catch (error) {
+        console.error("Error fetching home products:", error);
+      }
+    };
+
+    fetchData();
+  }, [newArrivals, bestSellers, setNewArrivals, setBestSellers]);
+
+
   const homeSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'Jade Intimo - Premium Intimates & Loungewear',
-    description: 'Discover luxurious intimates, lingerie, and loungewear designed for the modern woman and man.',
+    description: 'Discover luxurious intimates, lingerie, and loungewear.',
     url: 'https://jade-intimo.com',
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Women\'s Collection', url: 'https://jade-intimo.com/women' },
         { '@type': 'ListItem', position: 2, name: 'Men\'s Collection', url: 'https://jade-intimo.com/men' },
-        { '@type': 'ListItem', position: 3, name: 'Lingerie', url: 'https://jade-intimo.com/women/lingerie' },
-        { '@type': 'ListItem', position: 4, name: 'Swimwear', url: 'https://jade-intimo.com/women/bathing-suits' },
       ],
     },
   };
@@ -28,7 +61,7 @@ const Index = () => {
     <>
       <SEO 
         title="Jade Intimo | Premium Intimates & Loungewear"
-        description="Discover luxurious intimates, lingerie, and loungewear designed for the modern woman and man. Shop bras, panties, pajamas, and swimwear with free shipping over $100."
+        description="Shop bras, panties, pajamas, and swimwear with free shipping over $100."
         url="https://jade-intimo.com"
         schema={homeSchema}
       />
@@ -37,8 +70,10 @@ const Index = () => {
         <main role="main">
           <Hero />
           <FeaturedCategories />
-          <NewArrivals />
-          <Bestsellers />
+          
+          {/* Passing the data from Zustand to components */}
+          <NewArrivals products={newArrivals}/>
+          <Bestsellers products={bestSellers}/>
         </main>
         <Footer />
       </div>

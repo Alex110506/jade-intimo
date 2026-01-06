@@ -1,83 +1,203 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Heart, Truck, Shield, RotateCcw, ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
-import { products } from '@/data/products';
-import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
+
+// Importuri Zustand
+import  useAuthStore from '@/hooks/use-authstore'; // Asigură-te că calea e corectă
+import { useCartStore, CartItem } from '@/hooks/use-cartstore'; // Noul store creat mai sus
+
+// Import your base interface
+import { Product } from '@/data/products';
+
+interface Variants {
+  id: string;
+  product_id: string;
+  size: string;
+  quantity: number;
+}
 
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addItem } = useCart();
   
-  const product = products.find((p) => p.id === id);
-  
-  const [selectedSize, setSelectedSize] = useState<string>('');
-  const [selectedColor, setSelectedColor] = useState<string>(product?.colors?.[0] || '');
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  // Zustand Stores
+  const { isAuthenticated } = useAuthStore();
+  const { addItem } = useCartStore();
 
-  if (!product) {
+  // State typed strictly with Product
+  const [product, setProduct] = useState<Product | null>(null);
+  const [variants, setVariants] = useState<Variants[] | null>([]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  // UI State
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
+  const [quantity, setQuantity] = useState(1);
+  const [available, setAvailable] = useState(0);
+
+  // 1. Fetch Product Data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const response = await fetch(`http://localhost:3000/api/products/${id}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setProduct(null);
+            return;
+          }
+          throw new Error('Failed to fetch product');
+        }
+
+        const data = await response.json();
+        // Ajustare în funcție de structura răspunsului tău (data.product sau data.product.product)
+        const productData = data.product?.product || data.product; 
+        const variantsData = data.product?.variants || [];
+
+        setProduct(productData);
+        setVariants(variantsData);
+        
+        // Reset selections
+        setSelectedSize('');
+        setQuantity(1);
+
+        // Fetch Related Products logic here if needed...
+
+      } catch (err) {
+        console.error("Error loading product:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+      window.scrollTo(0, 0);
+    }
+  }, [id]);
+
+  const handleAddToCart = async () => {
+    // 1. Validări
+    if (variants && variants.length > 0 && !selectedSize) {
+      toast.error('Te rugăm să alegi o mărime');
+      return;
+    }
+
+    if (!available || available === 0) {
+      toast.error('Acest produs nu este în stoc');
+      return;
+    }
+
+    if (quantity > available) {
+      toast.error(`Stoc insuficient. Mai sunt doar ${available} bucăți.`);
+      return;
+    }
+
+    // Construim obiectul produsului pentru coș
+    const cartItemToAdd: CartItem = {
+      ...product,
+      variantId:selectedVariantId,
+      size: selectedSize,
+      quantity: quantity,
+    };
+
+    // 2. Logica bifurcată: Auth vs Guest
+    if (isAuthenticated) {
+      // --- LOGICA PENTRU USERI LOGAȚI (API) ---
+      try {
+        const response = await fetch("http://localhost:3000/api/cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: id,
+            variantId: selectedVariantId,
+            quantity: quantity
+          }),
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to add product to cart");
+        }
+
+        // Succes API -> Adăugăm și în Zustand pentru update instant la UI (ex: numărul din iconița de coș)
+        // Alternativ, poți refetchui tot coșul de la API.
+        addItem(cartItemToAdd);
+        toast.success(`${product?.name} a fost adăugat în coș!`);
+
+      } catch (error: any) {
+        console.error("Cart Error:", error);
+        toast.error(error.message || "A apărut o problemă. Încearcă din nou.");
+      }
+
+    } else {
+      // --- LOGICA PENTRU USERI NELOGAȚI (LocalStorage via Zustand) ---
+      try {
+        // Funcția addItem din Zustand se ocupă de salvarea în localStorage datorită middleware-ului 'persist'
+        addItem(cartItemToAdd);
+        toast.success(`${product?.name} a fost adăugat în coș (Local)!`);
+      } catch (error) {
+        toast.error("Nu s-a putut salva în coșul local.");
+      }
+    }
+  };
+
+  // Loading & Error States
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-pink-accent" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product || error) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 py-20 text-center">
           <h1 className="font-display text-3xl">Product Not Found</h1>
-          <p className="mt-4 text-muted-foreground">The product you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/')} className="mt-8">
-            Back to Home
-          </Button>
+          <Button onClick={() => navigate('/')} className="mt-8">Back to Home</Button>
         </main>
         <Footer />
       </div>
     );
   }
 
-  const handleAddToCart = () => {
-    if (product.sizes && product.sizes.length > 1 && !selectedSize) {
-      toast.error('Please select a size');
-      return;
-    }
-    for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedSize || product.sizes?.[0]);
-    }
-    toast.success(`${product.name} added to cart`);
-  };
-
-  const averageRating = product.rating || 4.5;
-  const reviewCount = product.reviews?.length || 0;
-  const images = product.images || [product.image];
-
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id && p.gender === product.gender)
-    .slice(0, 4);
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background mt-32">
       <SEO
         title={`${product.name} | Jade Intimo`}
         description={product.description || `Shop ${product.name} at Jade Intimo`}
-        keywords={`${product.name}, ${product.category}, ${product.gender} fashion, underwear, lingerie`}
       />
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
+        {/* Breadcrumb ... same as before */}
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-            <li><Link to="/" className="hover:text-foreground transition-colors">Home</Link></li>
+            <li><Link to="/" className="hover:text-foreground">Home</Link></li>
             <ChevronRight size={14} />
-            <li><Link to={`/${product.gender}`} className="hover:text-foreground transition-colors capitalize">{product.gender}</Link></li>
+            <li><Link to={`/${product.gender}`} className="capitalize hover:text-foreground">{product.gender}</Link></li>
             <ChevronRight size={14} />
-            <li><Link to={`/${product.gender}/${product.category}`} className="hover:text-foreground transition-colors capitalize">{product.category.replace('-', ' ')}</Link></li>
-            <ChevronRight size={14} />
-            <li className="text-foreground">{product.name}</li>
+            <li className="text-foreground font-medium truncate max-w-[200px]">{product.name}</li>
           </ol>
         </nav>
 
@@ -85,280 +205,104 @@ const ProductPage = () => {
           {/* Image Gallery */}
           <div className="space-y-4">
             <motion.div
-              key={selectedImage}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="aspect-[3/4] overflow-hidden bg-secondary"
+              className="aspect-[3/4] overflow-hidden bg-secondary rounded-sm"
             >
-              <img
-                src={images[selectedImage]}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
+              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
             </motion.div>
-            
-            {images.length > 1 && (
-              <div className="flex gap-3">
-                {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`aspect-square w-20 overflow-hidden border-2 transition-all ${
-                      selectedImage === idx ? 'border-foreground' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Product Details */}
-          <div className="space-y-6">
-            {/* Badges */}
-            <div className="flex gap-2">
-              {product.isNew && (
-                <span className="bg-foreground px-3 py-1 text-xs font-medium uppercase tracking-wider text-background">
-                  New
-                </span>
-              )}
-              {product.isBestseller && (
-                <span className="bg-pink px-3 py-1 text-xs font-medium uppercase tracking-wider text-foreground">
-                  Bestseller
-                </span>
-              )}
-            </div>
-
-            {/* Title & Price */}
+          <div className="space-y-8">
             <div>
-              <h1 className="font-display text-3xl lg:text-4xl">{product.name}</h1>
-              <div className="mt-3 flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={i < Math.floor(averageRating) ? 'fill-pink-accent text-pink-accent' : 'text-muted-foreground'}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    {averageRating.toFixed(1)} ({reviewCount} reviews)
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center gap-3">
-                <span className="text-2xl font-semibold">${product.price.toFixed(2)}</span>
+              <h1 className="font-heading text-3xl lg:text-4xl font-semibold">{product.name}</h1>
+              <div className="mt-6 flex items-center gap-4">
+                <span className="text-3xl font-semibold">${(Number(product.price) / 100).toFixed(2)}</span>
                 {product.originalPrice && (
-                  <span className="text-lg text-muted-foreground line-through">
-                    ${product.originalPrice.toFixed(2)}
-                  </span>
-                )}
-                {product.originalPrice && (
-                  <span className="bg-pink px-2 py-1 text-xs font-medium text-foreground">
-                    {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+                  <span className="text-xl text-muted-foreground line-through">
+                    ${Number(product.originalPrice / 100).toFixed(2)}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Description */}
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-
-            {/* Color Selection */}
-            {product.colors && product.colors.length > 0 && (
-              <div>
-                <h3 className="mb-3 text-sm font-medium uppercase tracking-wider">
-                  Color: <span className="font-normal normal-case">{selectedColor}</span>
-                </h3>
-                <div className="flex gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`rounded-full px-4 py-2 text-sm border transition-all ${
-                        selectedColor === color
-                          ? 'border-foreground bg-foreground text-background'
-                          : 'border-border hover:border-foreground'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <p className="text-muted-foreground leading-relaxed text-lg">
+              {product.description || "No description available."}
+            </p>
 
             {/* Size Selection */}
-            {product.sizes && product.sizes.length > 0 && (
+            {variants && variants.length > 0 && (
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-medium uppercase tracking-wider">Size</h3>
-                  <button className="text-sm text-muted-foreground underline hover:text-foreground">
-                    Size Guide
-                  </button>
+                  <h3 className="text-sm font-bold uppercase tracking-wider">Alege Mărimea</h3>
+                  <button className="text-sm text-muted-foreground underline">Size Guide</button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`min-w-[3rem] border px-4 py-2 text-sm transition-all ${
-                        selectedSize === size
-                          ? 'border-foreground bg-foreground text-background'
-                          : 'border-border hover:border-foreground'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-3">
+                  {variants.map((vari) => {
+                    const isOutOfStock = vari.quantity === 0;
+                    return (
+                      <button
+                        key={vari.size}
+                        onClick={() => {
+                          setSelectedSize(vari.size);
+                          setAvailable(vari.quantity);
+                          setSelectedVariantId(vari.id);
+                          setQuantity(1); // Reset quantity on size change
+                        }}
+                        disabled={isOutOfStock}
+                        className={`min-w-[3.5rem] border px-4 py-3 text-sm font-medium transition-all 
+                          ${isOutOfStock 
+                            ? 'border-gray-200 text-gray-300 decoration-line-through cursor-not-allowed bg-gray-50'
+                            : selectedSize === vari.size 
+                              ? 'border-foreground bg-foreground text-background' 
+                              : 'border-border hover:border-foreground text-foreground'
+                          }
+                        `}
+                      >
+                        {vari.size}
+                      </button>
+                    );
+                  })}
                 </div>
+                {/* Stock info */}
+                {selectedSize && (
+                  <div className="mt-3 text-sm font-medium">
+                     {available >= 5 
+                       ? <span className="text-green-600">În Stoc</span> 
+                       : <span className="text-orange-500">Stoc Limitat ({available})</span>
+                     }
+                  </div>
+                )}
               </div>
             )}
 
             {/* Quantity & Actions */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border border-border">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border">
+              <div className="flex items-center border border-border w-max">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 py-3 hover:bg-secondary transition-colors"
-                >
-                  -
-                </button>
-                <span className="px-4 py-3 min-w-[3rem] text-center">{quantity}</span>
+                  className="px-4 py-3 hover:bg-secondary text-lg"
+                >-</button>
+                <span className="px-4 py-3 min-w-[3rem] text-center font-medium">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-4 py-3 hover:bg-secondary transition-colors"
-                >
-                  +
-                </button>
+                  onClick={() => setQuantity(Math.min(available || 99, quantity + 1))}
+                  className="px-4 py-3 hover:bg-secondary text-lg"
+                >+</button>
               </div>
               
-              <Button
-                onClick={handleAddToCart}
-                className="flex-1 h-12 text-sm uppercase tracking-wider"
-              >
-                Add to Cart
+              <Button onClick={handleAddToCart} disabled={loading ? true : false} className="flex-1 h-auto py-4 text-sm font-bold uppercase">
+                Adaugă în coș
               </Button>
-              
-              <button
-                onClick={() => {
-                  setIsLiked(!isLiked);
-                  toast.success(isLiked ? 'Removed from wishlist' : 'Added to wishlist');
-                }}
-                className="flex h-12 w-12 items-center justify-center border border-border hover:border-foreground transition-colors"
-              >
-                <Heart
-                  size={20}
-                  className={isLiked ? 'fill-pink-accent text-pink-accent' : ''}
-                />
-              </button>
             </div>
-
-            {/* Features */}
-            <div className="grid grid-cols-3 gap-4 border-t border-b border-border py-6">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Truck size={20} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Free Shipping</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <RotateCcw size={20} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">30-Day Returns</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Shield size={20} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Secure Checkout</span>
-              </div>
+            
+            {/* Details & Material Sections */}
+            <div className="space-y-4 pt-6">
+               {/* ... (restul detaliilor) */}
             </div>
-
-            {/* Product Details */}
-            {product.details && (
-              <div>
-                <h3 className="mb-3 text-sm font-medium uppercase tracking-wider">Details</h3>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {product.details.map((detail, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Material */}
-            {product.material && (
-              <div>
-                <h3 className="mb-2 text-sm font-medium uppercase tracking-wider">Material</h3>
-                <p className="text-sm text-muted-foreground">{product.material}</p>
-              </div>
-            )}
           </div>
         </div>
-
-        {/* Reviews Section */}
-        {product.reviews && product.reviews.length > 0 && (
-          <section className="mt-20">
-            <h2 className="font-display text-2xl mb-8">Customer Reviews</h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              {product.reviews.map((review) => (
-                <article key={review.id} className="border border-border p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{review.userName}</span>
-                      {review.verified && (
-                        <span className="text-xs bg-secondary px-2 py-0.5 text-muted-foreground">
-                          Verified Purchase
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-sm text-muted-foreground">{review.date}</span>
-                  </div>
-                  <div className="flex items-center gap-1 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={i < review.rating ? 'fill-pink-accent text-pink-accent' : 'text-muted-foreground'}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <section className="mt-20">
-            <h2 className="font-display text-2xl mb-8">You May Also Like</h2>
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-              {relatedProducts.map((relatedProduct) => (
-                <Link
-                  key={relatedProduct.id}
-                  to={`/product/${relatedProduct.id}`}
-                  className="group"
-                >
-                  <div className="aspect-[3/4] overflow-hidden bg-secondary mb-3">
-                    <img
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="text-sm font-medium group-hover:text-muted-foreground transition-colors">
-                    {relatedProduct.name}
-                  </h3>
-                  <p className="mt-1 text-sm">${relatedProduct.price.toFixed(2)}</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
-      
       <Footer />
     </div>
   );

@@ -34,7 +34,7 @@ export const navigationData: NavigationData = {
       name: 'Sutiene',
       slug: 'sutiene',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Push up si super push up', slug: 'push-up' },
         { name: 'Balconet', slug: 'balconet' },
         { name: 'Triunghi', slug: 'triunghi' },
@@ -65,7 +65,7 @@ export const navigationData: NavigationData = {
       name: 'Lenjerie',
       slug: 'lenjerie',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Body', slug: 'body' },
         { name: 'Corset', slug: 'corset' },
         { name: 'Portjartiera', slug: 'portjartiera' },
@@ -80,7 +80,7 @@ export const navigationData: NavigationData = {
       name: 'Pijamale',
       slug: 'pijamale',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Maneca lunga pantalon lung', slug: 'maneca-lunga-pantalon-lung' },
         { name: 'Camasa de noapte', slug: 'camasa-de-noapte' },
         { name: 'Lenjerie de noapte', slug: 'lenjerie-de-noapte' },
@@ -92,7 +92,7 @@ export const navigationData: NavigationData = {
       name: 'Imbracaminte',
       slug: 'imbracaminte',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Tricouri polo', slug: 'tricouri-polo' },
         { name: 'Treninguri', slug: 'treninguri' },
         { name: 'Tinute de casa', slug: 'tinute-de-casa' },
@@ -105,7 +105,7 @@ export const navigationData: NavigationData = {
       name: 'Costume de Baie',
       slug: 'costume-de-baie',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Costume intregi', slug: 'costume-intregi' },
         { name: 'Costume intregi modelatoare', slug: 'costume-intregi-modelatoare' },
         { name: 'Costume 2 piese', slug: 'costume-2-piese' },
@@ -146,7 +146,7 @@ export const navigationData: NavigationData = {
       name: 'Imbracaminte',
       slug: 'imbracaminte',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Treninguri', slug: 'treninguri' },
         { name: 'Tricouri', slug: 'tricouri' },
         { name: 'Maiouri', slug: 'maiouri' },
@@ -156,7 +156,7 @@ export const navigationData: NavigationData = {
       name: 'Costume de Baie',
       slug: 'costume-de-baie',
       subcategories: [
-        { name: 'Toate', slug: 'toate' },
+        { name: 'Toate', slug: '' },
         { name: 'Short-uri', slug: 'short-uri' },
         { name: 'Boxeri', slug: 'boxeri' },
         { name: 'Slipuri', slug: 'slipuri' },

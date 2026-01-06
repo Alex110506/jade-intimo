@@ -1,18 +1,21 @@
 import { motion } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
-import { products } from '@/data/products';
 import ProductCard from '@/components/products/ProductCard';
 
-const Bestsellers = () => {
+const Bestsellers = ({ products }) => {
   const { gender } = useGender();
-  const bestsellerProducts = products.filter(
-    (p) => p.gender === gender && p.isBestseller
-  ).slice(0, 4);
+
+  if (!products) return null;
+
+  const bestsellerProducts = products
+    .filter((p) => p.gender === gender && p.isBestseller)
+    .slice(0, 4);
 
   // If no bestsellers for this gender, show products
-  const displayProducts = bestsellerProducts.length > 0 
-    ? bestsellerProducts 
-    : products.filter(p => p.gender === gender).slice(0, 4);
+  const displayProducts =
+    bestsellerProducts.length > 0
+      ? bestsellerProducts
+      : products.filter((p) => p.gender === gender).slice(0, 4);
 
   return (
     <section className="section-padding bg-background">
@@ -37,7 +40,7 @@ const Bestsellers = () => {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {displayProducts.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product.id || product._id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

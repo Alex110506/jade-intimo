@@ -3,14 +3,19 @@ import { Link } from 'react-router-dom';
 import { Search, ShoppingBag, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
-import { useCart } from '@/context/CartContext';
-import { navigationData, Category } from '@/data/navigation';
+import { navigationData } from '@/data/navigation';
 import logo from "../../assets/logo.webp";
 
+// 1. Importăm noul store Zustand
+import { useCartStore } from '@/hooks/use-cartstore';
 
 const Navbar = () => {
   const { gender, setGender } = useGender();
-  const { totalItems } = useCart();
+  
+  // 2. Extragem coșul din Zustand și calculăm totalul de produse
+  const cart = useCartStore((state) => state.cart);
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -82,11 +87,11 @@ const Navbar = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
-              <Link to="/" className="flex flex-row gap-2 absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
+            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
+              <Link to="/" className="flex flex-row gap-2">
                 <img src={logo} alt="logo" className='w-28'/>
-            </Link>
-            </Link>
+              </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex lg:items-center lg:gap-6">
