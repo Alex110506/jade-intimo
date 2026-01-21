@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight,ArrowBigDownDash } from 'lucide-react';
 import { useGender } from '@/context/GenderContext';
 import heroWomen from '@/assets/hero-women.jpg';
 import heroMen from '@/assets/hero-men.jpg';
@@ -77,12 +77,12 @@ const Hero = () => {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
-          className="flex flex-col items-center gap-2"
+          className="flex flex-col items-center gap-1"
         >
-          <span className="text-xs uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs uppercase tracking-widest font-bold">
             Scroll
           </span>
-          <div className="h-10 w-[1px] bg-gradient-to-b from-foreground to-transparent" />
+          <ArrowBigDownDash />
         </motion.div>
       </motion.div>
     </section>

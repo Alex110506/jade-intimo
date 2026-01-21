@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { GenderProvider } from "@/context/GenderContext";
 
 import useAuthStore from "@/hooks/use-authstore.ts";
@@ -21,9 +21,16 @@ import NotFound from "./pages/NotFound";
 import UserPage from "./pages/UserPage.tsx";
 import NewPage from "./pages/NewPage.tsx";
 
+import AdminLayout from "./pages/admin/AdminLayout.tsx";
+import DashboardAdmin from "./pages/admin/DashboardAdmin.tsx";
+import AddProductPageAdmin from "./pages/admin/AddProductPageAdmin.tsx";
+import ProductListAdmin from "./pages/admin/ProductListAdmin.tsx";
+import ProductPageAdmin from "./pages/admin/ProductPageAdmin.tsx";
+
 const queryClient = new QueryClient();
 
 const App = () => {
+  const user=useAuthStore((state)=>state.user)
   const setUser = useAuthStore((state) => state.setUser);
   const setAddress = useAuthStore((state) => state.setAddress);
   const [loading, setLoading] = useState(true);
@@ -152,6 +159,23 @@ const App = () => {
                   path="/login"
                   element={isAuthenticated ? <UserPage /> : <LoginPage />}
                 />
+
+                <Route
+                  path="/admin"
+                  element={(isAuthenticated && user.role === "admin") ? <AdminLayout/> : <Navigate to={"/"}/>}
+                >
+                  <Route index element={<DashboardAdmin/>}></Route>
+                  <Route path="products">
+                    <Route index element={<ProductListAdmin/>}></Route>
+                    <Route path=":id" element={<ProductPageAdmin/>}></Route>
+                    <Route path="add" element={<AddProductPageAdmin/>}></Route>
+                  </Route>
+                  
+                  {/* <Route path="orders">
+
+                  </Route> */}
+                </Route>
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

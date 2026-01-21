@@ -28,57 +28,54 @@ const CartPage = () => {
 
   // 3. Handlers pentru acțiuni (Sincronizare API + Zustand)
   
-  // const handleUpdateQuantity = async (variantId: string, newQuantity: number) => {
-  //   if (newQuantity < 1) return;
+  const handleUpdateQuantity = async (variantId: string,quantity:number, newQuantity: number) => {
 
-  //   setIsUpdating(variantId);
+    setIsUpdating(variantId);
     
-  //   try {
-  //     if (isAuthenticated) {
-  //       // Dacă e logat, actualizăm pe server
-  //       const response = await fetch('http://localhost:3000/api/cart', {
-  //         method: 'PUT', // Sau PATCH, depinde de backend-ul tău
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ variantId, quantity: newQuantity }),
-  //         credentials: 'include',
-  //       });
+    try {
+      if (isAuthenticated) {
+        // Dacă e logat, actualizăm pe server
+        const response = await fetch(`http://localhost:3000/api/cart/${variantId}`, {
+          method: 'PATCH', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nr: newQuantity }),
+          credentials: 'include',
+        });
 
-  //       if (!response.ok) throw new Error('Failed to update cart');
-  //     }
+        if (!response.ok) throw new Error('Failed to update cart');
+      }
 
-  //     // Actualizăm local în Zustand
-  //     updateQuantity(variantId, newQuantity);
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Could not update quantity");
-  //   } finally {
-  //     setIsUpdating(null);
-  //   }
-  // };
+      // Actualizăm local în Zustand
+      updateQuantity(variantId, quantity+newQuantity);
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not update quantity");
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
-  // const handleRemoveItem = async (variantId: string) => {
-  //   setIsUpdating(variantId);
-  //   try {
-  //     if (isAuthenticated) {
-  //       // Dacă e logat, ștergem de pe server
-  //       const response = await fetch(`http://localhost:3000/api/cart/${variantId}`, {
-  //         method: 'DELETE',
-  //         credentials: 'include',
-  //       });
+  const handleRemoveItem = async (variantId: string) => {
+    setIsUpdating(variantId);
+    try {
+      if (isAuthenticated) {
+        const response = await fetch(`http://localhost:3000/api/cart/${variantId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
 
-  //       if (!response.ok) throw new Error('Failed to remove item');
-  //     }
+        if (!response.ok) throw new Error('Failed to remove item');
+      }
 
-  //     // Ștergem local din Zustand
-  //     removeItem(variantId);
-  //     toast.success("Item removed");
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Could not remove item");
-  //   } finally {
-  //     setIsUpdating(null);
-  //   }
-  // };
+      removeItem(variantId);
+      toast.success("Item removed");
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not remove item");
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   return (
     <>
@@ -193,7 +190,7 @@ const CartPage = () => {
                               {/* Quantity Controls */}
                               <div className="flex items-center border border-border rounded-sm">
                                 <button
-                                  // onClick={() => handleUpdateQuantity(item.variantId, item.quantity - 1)}
+                                  onClick={() => handleUpdateQuantity(item.variantId,item.quantity, -1)}
                                   className="flex h-8 w-8 items-center justify-center transition-colors hover:bg-secondary disabled:opacity-50"
                                   disabled={item.quantity <= 1}
                                   aria-label="Decrease quantity"
@@ -204,7 +201,7 @@ const CartPage = () => {
                                   {item.quantity}
                                 </span>
                                 <button
-                                  // onClick={() => handleUpdateQuantity(item.variantId, item.quantity + 1)}
+                                  onClick={() => handleUpdateQuantity(item.variantId,item.quantity, 1)}
                                   className="flex h-8 w-8 items-center justify-center transition-colors hover:bg-secondary"
                                   aria-label="Increase quantity"
                                 >
@@ -214,7 +211,7 @@ const CartPage = () => {
 
                               {/* Remove Button */}
                               <button
-                                //onClick={() => handleRemoveItem(item.variantId)}
+                                onClick={() => handleRemoveItem(item.variantId)}
                                 className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-red-500"
                               >
                                 <Trash2 size={16} />

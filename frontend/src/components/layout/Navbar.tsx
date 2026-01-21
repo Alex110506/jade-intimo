@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingBag, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search,LockKeyhole, ShoppingBag, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
 import { navigationData } from '@/data/navigation';
 import logo from "../../assets/logo.webp";
+import useAuthStore from '@/hooks/use-authstore';
 
 // 1. Importăm noul store Zustand
 import { useCartStore } from '@/hooks/use-cartstore';
@@ -22,6 +23,9 @@ const Navbar = () => {
   const [expandedMobileCategory, setExpandedMobileCategory] = useState<string | null>(null);
 
   const categories = gender === 'women' ? navigationData.women : navigationData.men;
+
+  const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
+
 
   const handleCategoryHover = (slug: string | null) => {
     setActiveCategory(slug);
@@ -142,7 +146,7 @@ const Navbar = () => {
             </nav>
 
             {/* Right Icons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 md:gap-4">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2 transition-opacity duration-base hover:opacity-70"
@@ -152,11 +156,18 @@ const Navbar = () => {
               </button>
               <Link
                 to="/login"
-                className="hidden p-2 transition-opacity duration-base hover:opacity-70 md:block"
+                className="p-2 transition-opacity duration-base hover:opacity-70 md:block"
                 aria-label="Account"
               >
                 <User size={20} />
               </Link>
+              {isAuthenticated && (<Link
+                to="/admin"
+                className="p-2 transition-opacity duration-base hover:opacity-70 md:block"
+                aria-label="Admin"
+              >
+                <LockKeyhole />
+              </Link>)}
               <Link
                 to="/cart"
                 className="relative p-2 transition-opacity duration-base hover:opacity-70"
