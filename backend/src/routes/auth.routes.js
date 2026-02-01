@@ -16,7 +16,7 @@ router.post('/signup', signupController);
 router.post('/login', loginController);
 router.post('/logout', authenticateToken, logoutController);
 
-router.put('/updateData', authenticateToken, updateDataController);
+router.patch('/updateData', authenticateToken, updateDataController);
 
 router.get("/getAddress",authenticateToken,getAddressController)
 router.post("/addAddress",authenticateToken,addAddressController)

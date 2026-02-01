@@ -1,38 +1,44 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Check, CreditCard, Truck, MapPin } from 'lucide-react';
+import { ChevronRight, Check, CreditCard, Truck, MapPin, Banknote } from 'lucide-react'; // Added Banknote icon
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { toast } from 'sonner';
 
-// 1. Import Zustand Store instead of Context
 import { useCartStore } from '@/hooks/use-cartstore';
+import useAuthStore from '@/hooks/use-authstore';
 
 type Step = 'shipping' | 'payment' | 'review';
+type PaymentMethod = 'credit_card' | 'cod'; // New type definition
 
 const CheckoutPage = () => {
-  // 2. Use Zustand hooks
   const { cart, clearCart } = useCartStore();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 3. Calculate Totals Locally (since Zustand stores raw data)
+  // New State for Payment Method Selector
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
+
+  const user = useAuthStore((state) => state.user);
+  const address = useAuthStore((state) => state.address);
+  const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
+
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) / 100;
   const shippingCost = cartTotal > 100 ? 0 : 9.99;
   const finalTotal = cartTotal + shippingCost;
 
   const [shippingInfo, setShippingInfo] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'United States',
+    firstName: isAuthenticated ? user.first_name : '',
+    lastName: isAuthenticated ? user.last_name : '',
+    email: isAuthenticated ? user.email : '',
+    phone: isAuthenticated ? user.phone : '',
+    address: isAuthenticated ? address.address_line : '',
+    city: isAuthenticated ? address.city : '',
+    state: isAuthenticated ? address.state : '',
+    zipCode: isAuthenticated ? address.postal_code : '',
+    country: isAuthenticated ? address.country : '',
   });
 
   const [paymentInfo, setPaymentInfo] = useState({
@@ -55,19 +61,23 @@ const CheckoutPage = () => {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Logic: If COD is selected, we don't need to validate card details
     setCurrentStep('review');
   };
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
     
-    // NOTE: Here you would ideally make a POST request to your backend to create the order
-    // e.g., await fetch('/api/orders', { method: 'POST', body: ... })
+    // NOTE FOR YOU: 
+    // You now have access to the `paymentMethod` state variable here.
+    // e.g. const orderData = { ...cart, paymentMethod, ...shippingInfo }
+    
+    console.log("Placing order with method:", paymentMethod); // For debugging
 
-    // Simulate order processing for now
+    // Simulate order processing
     await new Promise((resolve) => setTimeout(resolve, 2000));
     
-    clearCart(); // Clear Zustand store
+    clearCart();
     toast.success('Order placed successfully!');
     navigate('/');
   };
@@ -165,41 +175,32 @@ const CheckoutPage = () => {
                   onSubmit={handleShippingSubmit}
                   className="space-y-6"
                 >
-                  <h2 className="font-heading text-2xl font-semibold">
+                   {/* ... (Shipping form content remains exactly the same) ... */}
+                   <h2 className="font-heading text-2xl font-semibold">
                     Shipping Information
                   </h2>
-
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-medium">
-                        First Name
-                      </label>
+                      <label className="mb-2 block text-sm font-medium">First Name</label>
                       <input
                         type="text"
                         required
                         value={shippingInfo.firstName}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, firstName: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium">
-                        Last Name
-                      </label>
+                      <label className="mb-2 block text-sm font-medium">Last Name</label>
                       <input
                         type="text"
                         required
                         value={shippingInfo.lastName}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, lastName: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
                   </div>
-
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-sm font-medium">Email</label>
@@ -207,9 +208,7 @@ const CheckoutPage = () => {
                         type="email"
                         required
                         value={shippingInfo.email}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, email: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
@@ -219,27 +218,21 @@ const CheckoutPage = () => {
                         type="tel"
                         required
                         value={shippingInfo.phone}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, phone: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium">Address</label>
                     <input
                       type="text"
                       required
                       value={shippingInfo.address}
-                      onChange={(e) =>
-                        setShippingInfo({ ...shippingInfo, address: e.target.value })
-                      }
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
                       className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                     />
                   </div>
-
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div>
                       <label className="mb-2 block text-sm font-medium">City</label>
@@ -247,9 +240,7 @@ const CheckoutPage = () => {
                         type="text"
                         required
                         value={shippingInfo.city}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, city: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
@@ -259,9 +250,7 @@ const CheckoutPage = () => {
                         type="text"
                         required
                         value={shippingInfo.state}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, state: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
@@ -271,14 +260,11 @@ const CheckoutPage = () => {
                         type="text"
                         required
                         value={shippingInfo.zipCode}
-                        onChange={(e) =>
-                          setShippingInfo({ ...shippingInfo, zipCode: e.target.value })
-                        }
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
                         className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                     </div>
                   </div>
-
                   <button type="submit" className="btn-primary w-full sm:w-auto">
                     Continue to Payment
                   </button>
@@ -291,73 +277,68 @@ const CheckoutPage = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   onSubmit={handlePaymentSubmit}
-                  className="space-y-6"
+                  className="space-y-8"
                 >
                   <h2 className="font-heading text-2xl font-semibold">
-                    Payment Information
+                    Payment Method
                   </h2>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="1234 5678 9012 3456"
-                      value={paymentInfo.cardNumber}
-                      onChange={(e) =>
-                        setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })
-                      }
-                      className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
-                    />
+                  {/* 1. Payment Method Selector */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('credit_card')}
+                      className={`flex flex-col items-center justify-center gap-2 rounded-lg border p-6 transition-all ${
+                        paymentMethod === 'credit_card'
+                          ? 'border-foreground bg-secondary/50 ring-1 ring-foreground'
+                          : 'border-border hover:border-foreground/50'
+                      }`}
+                    >
+                      <CreditCard size={24} />
+                      <span className="text-sm font-medium">Credit Card</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={`flex flex-col items-center justify-center gap-2 rounded-lg border p-6 transition-all ${
+                        paymentMethod === 'cod'
+                          ? 'border-foreground bg-secondary/50 ring-1 ring-foreground'
+                          : 'border-border hover:border-foreground/50'
+                      }`}
+                    >
+                      <Banknote size={24} />
+                      <span className="text-sm font-medium">Pay on Delivery</span>
+                    </button>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">
-                      Name on Card
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={paymentInfo.cardName}
-                      onChange={(e) =>
-                        setPaymentInfo({ ...paymentInfo, cardName: e.target.value })
-                      }
-                      className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="MM/YY"
-                        value={paymentInfo.expiry}
-                        onChange={(e) =>
-                          setPaymentInfo({ ...paymentInfo, expiry: e.target.value })
-                        }
-                        className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
-                      />
+                  {/* 2. Conditional Rendering for Credit Card Form */}
+                  {paymentMethod === 'credit_card' ? (
+                    <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary/20 p-6 animate-in fade-in slide-in-from-top-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                        <CreditCard size={24} className="text-foreground"/>
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Pay via Credit Card</h3>
+                        <p className="text-sm text-muted-foreground">
+                          You will be redirected to another page to pay via Credit Card
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium">CVV</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="123"
-                        value={paymentInfo.cvv}
-                        onChange={(e) =>
-                          setPaymentInfo({ ...paymentInfo, cvv: e.target.value })
-                        }
-                        className="w-full border border-border bg-transparent px-4 py-3 text-sm focus:border-foreground focus:outline-none"
-                      />
+                  ) : (
+                    // 3. UI for Cash on Delivery
+                    <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary/20 p-6 animate-in fade-in slide-in-from-top-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                        <Truck size={24} className="text-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Pay upon delivery</h3>
+                        <p className="text-sm text-muted-foreground">
+                          You will pay in cash or card when the courier arrives at your location.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex gap-4">
                     <button
@@ -405,11 +386,18 @@ const CheckoutPage = () => {
                   {/* Payment Summary */}
                   <div className="border border-border p-6">
                     <div className="flex items-center gap-3">
-                      <CreditCard size={20} />
+                      {paymentMethod === 'credit_card' ? (
+                        <CreditCard size={20} />
+                      ) : (
+                        <Banknote size={20} />
+                      )}
                       <h3 className="font-medium">Payment Method</h3>
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">
-                      Card ending in ****{paymentInfo.cardNumber.slice(-4)}
+                      {paymentMethod === 'credit_card' 
+                        ? `Pay via Credit Card (Stripe)`
+                        : 'Pay on Delivery (Cash upon arrival)'
+                      }
                     </p>
                   </div>
 
@@ -435,7 +423,6 @@ const CheckoutPage = () => {
                               Qty: {item.quantity}
                             </p>
                           </div>
-                          {/* Price formatting fixed */}
                           <p className="text-sm font-medium">
                             ${((item.price * item.quantity) / 100).toFixed(2)}
                           </p>
@@ -486,7 +473,6 @@ const CheckoutPage = () => {
                           Qty: {item.quantity}
                         </p>
                       </div>
-                      {/* Price formatting fixed */}
                       <p className="text-sm font-medium">
                         ${((item.price * item.quantity) / 100).toFixed(2)}
                       </p>
