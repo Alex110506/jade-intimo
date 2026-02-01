@@ -25,9 +25,18 @@ const CheckoutPage = () => {
   const address = useAuthStore((state) => state.address);
   const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) / 100;
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shippingCost = cartTotal > 100 ? 0 : 9.99;
   const finalTotal = cartTotal + shippingCost;
+
+  const cartItems=cart.map((item)=>{
+    return {
+      variant_id:item.variantId,
+      quantity:item.quantity,
+      price:item.price
+    }
+  })
+
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: isAuthenticated ? user.first_name : '',
@@ -67,19 +76,51 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
-    
-    // NOTE FOR YOU: 
-    // You now have access to the `paymentMethod` state variable here.
-    // e.g. const orderData = { ...cart, paymentMethod, ...shippingInfo }
-    
-    console.log("Placing order with method:", paymentMethod); // For debugging
 
-    // Simulate order processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    clearCart();
-    toast.success('Order placed successfully!');
-    navigate('/');
+    try {
+      // 1. Calculate final integer amount in CENTS for the database
+      // (finalTotal is in dollars/float, so we multiply by 100 and round)
+      const totalAmountInCents = Math.round(finalTotal * 100);
+
+      const res = await fetch("http://localhost:3000/api/order/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", 
+        body: JSON.stringify({
+          email: shippingInfo.email,
+          first_name: shippingInfo.firstName,
+          last_name: shippingInfo.lastName,
+          address_line: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          postal_code: shippingInfo.zipCode,
+          country: shippingInfo.country || "Romania",
+          total_ammount: finalTotal, 
+          payment_method: paymentMethod,
+          items: cartItems,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || data.details || "Failed to place order");
+      }
+
+      // if (paymentMethod === 'credit_card' && data.url) {
+      //   window.location.href = data.url; 
+      // } else {
+        clearCart();
+        toast.success("Order placed successfully!");
+        navigate("/"); 
+      // }
+
+    } catch (error: any) {
+      console.error("Checkout Error:", error);
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -98,6 +139,7 @@ const CheckoutPage = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen">
@@ -496,7 +538,7 @@ const CheckoutPage = () => {
                   <hr className="border-border" />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
-                    <span>${finalTotal.toFixed(2)}</span>
+                    <span>${(finalTotal/100).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -60,7 +60,6 @@ const ProductPage = () => {
         }
 
         const data = await response.json();
-        // Ajustare în funcție de structura răspunsului tău (data.product sau data.product.product)
         const productData = data.product?.product || data.product; 
         const variantsData = data.product?.variants || [];
 
