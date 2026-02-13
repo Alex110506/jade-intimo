@@ -9,22 +9,23 @@ import {
   Check, 
   ChevronRight,
   Mail,
-  Phone,
-  User as UserIcon,
-  X
+  Phone
 } from "lucide-react";
 import { toast } from "sonner";
-import useAuthStore from "@/hooks/use-authstore.ts";
-import { useCartStore } from "@/hooks/use-cartstore.ts";
+import useAuthStore from "@/hooks/use-authstore";
+import { useCartStore } from "@/hooks/use-cartstore";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 
-// Mock data for orders
-const MOCK_ORDERS = [
-  { id: "ORD-92831", date: "2025-11-12", status: "Delivered", total: 245.00 },
-  { id: "ORD-88210", date: "2025-12-05", status: "Processing", total: 120.50 },
-];
+// 1. Define Order Interface
+interface Order {
+  id: number;
+  status: 'pending' | 'paid' | 'shipping' | 'cancelled' | 'delivered';
+  total_ammount: number; // Matches DB typo (double 'm')
+  shipping_cost: number | null;
+  created_at: string;
+}
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -41,6 +42,10 @@ const UserPage = () => {
   // New States for Profile Editing
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // New State for Real Orders
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
 
   // --- Forms State ---
   const [addressForm, setAddressForm] = useState({
@@ -80,6 +85,36 @@ const UserPage = () => {
     }
   }, [user]);
 
+  // 3. Fetch Orders Implementation
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/order/get", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", 
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        const data = await response.json();
+        const ordersData = data.result || [];
+        setOrders(ordersData);
+
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
+
   // --- Handlers ---
 
   const handleLogout = async () => {
@@ -107,7 +142,6 @@ const UserPage = () => {
     setIsSavingProfile(true);
 
     try {
-      // Assuming PUT for updates
       const response = await fetch("http://localhost:3000/api/auth/updateData", {
         method: "PATCH", 
         headers: { "Content-Type": "application/json" },
@@ -117,14 +151,9 @@ const UserPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update profile");
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to update profile");
 
-      // Update Zustand with new user data
-      // Backend must return the updated user object in 'data.user'
       setUser(data.user); 
-      
       setIsEditingProfile(false);
       toast.success("Profile updated successfully");
     } catch (err: any) {
@@ -153,9 +182,7 @@ const UserPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to save address");
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to save address");
       
       setAddress(data.address);
       setIsEditingAddress(false);
@@ -173,6 +200,16 @@ const UserPage = () => {
     return "U";
   };
 
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'paid': return 'bg-green-50 text-green-700 border-green-200';
+      case 'shipping': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'delivered': return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
+      default: return 'bg-yellow-50 text-yellow-700 border-yellow-200'; 
+    }
+  };
+
   return (
     <div className="min-h-screen bg-secondary/10">
       <Navbar />
@@ -182,10 +219,8 @@ const UserPage = () => {
           {/* LEFT COLUMN: Profile & Address */}
           <div className="space-y-6">
             
-            {/* --- PROFILE CARD --- */}
+            {/* PROFILE CARD */}
             <div className="bg-background p-6 border border-border rounded-lg shadow-sm">
-              
-              {/* Profile Header & Edit Button */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 rounded-full bg-pink/20 flex items-center justify-center text-pink-accent text-xl font-bold border border-pink/30">
@@ -212,7 +247,6 @@ const UserPage = () => {
                 )}
               </div>
 
-              {/* Profile Form / Display */}
               {isEditingProfile ? (
                 <form onSubmit={handleSaveProfile} className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
@@ -237,7 +271,6 @@ const UserPage = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="text-xs font-medium text-muted-foreground ml-1">Phone Number</label>
                     <input
@@ -248,8 +281,6 @@ const UserPage = () => {
                       required
                     />
                   </div>
-
-                  {/* Read Only Email */}
                   <div>
                     <label className="text-xs font-medium text-muted-foreground ml-1">Email (Cannot be changed)</label>
                     <input
@@ -258,7 +289,6 @@ const UserPage = () => {
                       className="w-full text-sm border border-border bg-secondary/30 p-2 rounded text-muted-foreground cursor-not-allowed"
                     />
                   </div>
-
                   <div className="flex gap-2 pt-2">
                     <Button type="submit" disabled={isSavingProfile} className="flex-1 text-xs py-2 h-auto">
                       {isSavingProfile ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check size={14} className="mr-1" />}
@@ -274,7 +304,6 @@ const UserPage = () => {
                   </div>
                 </form>
               ) : (
-                // Display Mode
                 <div className="space-y-4 border-t border-border pt-4">
                   <div className="flex items-center gap-3 text-sm group">
                     <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
@@ -285,7 +314,6 @@ const UserPage = () => {
                       <p className="font-medium truncate max-w-[200px]" title={user?.email}>{user?.email}</p>
                     </div>
                   </div>
-
                   <div className="flex items-center gap-3 text-sm group">
                     <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
                       <Phone size={14} />
@@ -308,7 +336,7 @@ const UserPage = () => {
               </button>
             </div>
 
-            {/* --- ADDRESS CARD --- */}
+            {/* ADDRESS CARD */}
             <div className="bg-background p-6 border border-border rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -385,30 +413,61 @@ const UserPage = () => {
                 <h2 className="text-xl font-semibold">Order History</h2>
               </div>
 
-              {MOCK_ORDERS.length > 0 ? (
+              {isLoadingOrders ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                  <p>Loading your orders...</p>
+                </div>
+              ) : orders.length > 0 ? (
                 <div className="space-y-4">
-                  {MOCK_ORDERS.map((order) => (
-                    <div key={order.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-border rounded-lg hover:border-pink/50 transition-colors gap-4 bg-secondary/5">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-xs font-bold text-foreground uppercase tracking-wider">{order.id}</p>
-                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
-                            order.status === 'Delivered' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
-                          }`}>
-                            {order.status}
-                          </span>
+                  {orders.map((order) => {
+                    // Safe Calculation Logic
+                    const totalCents = Number(order.total_ammount);
+                    const shippingCents = Number(order.shipping_cost || 0);
+                    const finalDollars = (totalCents + shippingCents) / 100;
+
+                    return (
+                      <div key={order.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-border rounded-lg hover:border-pink/50 transition-colors gap-4 bg-secondary/5">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs font-bold text-foreground uppercase tracking-wider">
+                              #{order.id}
+                            </p>
+                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Placed on {new Date(order.created_at).toLocaleDateString()}
+                          </p>
+                          
+                          {/* Price Display */}
+                          <div className="mt-2 flex flex-col">
+                            <p className="text-sm font-bold">
+                              ${finalDollars.toFixed(2)}
+                            </p>
+                            
+                            {/* Conditional Shipping Label */}
+                            {shippingCents > 0 ? (
+                              <span className="text-[10px] text-muted-foreground">
+                                (Includes ${(shippingCents / 100).toFixed(2)} shipping)
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground">
+                                (Free Shipping)
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">Placed on {order.date}</p>
-                        <p className="text-sm font-bold mt-2">${order.total.toFixed(2)}</p>
+                        
+                        <button 
+                          className="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground transition-all group"
+                        >
+                          View Details <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                        </button>
                       </div>
-                      <button 
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                        className="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground transition-all group"
-                      >
-                        View Details <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center">

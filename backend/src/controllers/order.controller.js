@@ -1,5 +1,5 @@
 import logger from "#config/logger.js";
-import { createOrder } from "#services/order.service.js";
+import { createOrder, getOrdersByUserId } from "#services/order.service.js";
 import { formatValidationError } from "#utils/format.js";
 import { createOrderSchema } from "#validations/order.validation.js";
 import jwt from "jsonwebtoken";
@@ -60,3 +60,20 @@ export const placeOrderController = async (req, res) => {
         });
     }
 };
+
+export const getOrdersController=async (req,res)=>{
+    try {
+        const userId=req.user.id
+        const result=await getOrdersByUserId(userId)
+        
+        return res.status(200).json({
+            result
+        })
+    } catch (error) {
+        logger.error(`Error getting orders:`, error);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}

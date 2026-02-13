@@ -12,6 +12,7 @@ export const orders = pgTable("orders", {
   status: orderStatusEnum('status').default('pending').notNull(),
 
   total_ammount: integer('total_ammount').notNull(),
+  shipping_cost:integer('shipping_cost').default(0),
 
   email: varchar('email', { length: 255 }).notNull(),
   first_name: varchar('first_name', { length: 128 }).notNull(),

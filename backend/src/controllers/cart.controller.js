@@ -80,3 +80,34 @@ export const removeItem=async (req,res)=>{
         });
     }
 }
+
+export const deleteCartController = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const [userCart] = await db
+            .select()
+            .from(carts)
+            .where(eq(carts.user_id, userId))
+            .limit(1);
+
+        if (!userCart) {
+            return res.status(200).json({ message: "Cart is already empty" });
+        }
+
+        await db
+            .delete(cartItems)
+            .where(eq(cartItems.cart_id, userCart.id));
+
+        return res.status(200).json({ 
+            message: "Cart cleared successfully" 
+        });
+
+    } catch (error) {
+        logger.error("Error clearing cart:", error);
+        return res.status(500).json({ 
+            error: "Internal server error",
+            message: error.message 
+        });
+    }
+};
