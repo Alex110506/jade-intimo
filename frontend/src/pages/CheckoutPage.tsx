@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Check, CreditCard, Truck, MapPin, Banknote } from 'lucide-react'; // Added Banknote icon
+import { ChevronRight, Check, CreditCard, Truck, MapPin, Banknote } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { useCartStore } from '@/hooks/use-cartstore';
 import useAuthStore from '@/hooks/use-authstore';
 
 type Step = 'shipping' | 'payment' | 'review';
-type PaymentMethod = 'credit_card' | 'cod'; // New type definition
+type PaymentMethod = 'credit_card' | 'cod';
 
 const CheckoutPage = () => {
   const { cart, clearCart } = useCartStore();
@@ -18,7 +18,6 @@ const CheckoutPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // New State for Payment Method Selector
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
 
   const user = useAuthStore((state) => state.user);
@@ -29,14 +28,12 @@ const CheckoutPage = () => {
   const shippingCost = cartTotal > 100 ? 0 : 9.99;
   const finalTotal = cartTotal + shippingCost;
 
-  const cartItems=cart.map((item)=>{
-    return {
-      variant_id:item.variantId,
-      quantity:item.quantity,
-      price:item.price
-    }
-  })
-
+  // Transform cart items to match backend snake_case expectation
+  const cartItems = cart.map((item) => ({
+    variant_id: item.variantId,
+    quantity: item.quantity,
+    price: item.price
+  }));
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: isAuthenticated ? user.first_name : '',
@@ -48,13 +45,6 @@ const CheckoutPage = () => {
     state: isAuthenticated ? address.state : '',
     zipCode: isAuthenticated ? address.postal_code : '',
     country: isAuthenticated ? address.country : '',
-  });
-
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiry: '',
-    cvv: '',
   });
 
   const steps: { key: Step; label: string; icon: React.ElementType }[] = [
@@ -70,50 +60,81 @@ const CheckoutPage = () => {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic: If COD is selected, we don't need to validate card details
     setCurrentStep('review');
   };
 
+  // --- NEW WORKFLOW IMPLEMENTATION ---
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
 
     try {
-      // 1. Calculate final integer amount in CENTS for the database
-      // (finalTotal is in dollars/float, so we multiply by 100 and round)
-      const totalAmountInCents = Math.round(finalTotal * 100);
+      const orderPayload = {
+        email: shippingInfo.email,
+        first_name: shippingInfo.firstName,
+        last_name: shippingInfo.lastName,
+        address_line: shippingInfo.address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        postal_code: shippingInfo.zipCode,
+        country: shippingInfo.country || "Romania",
+        total_ammount: finalTotal,
+        payment_method: paymentMethod,
+        items: cartItems,
+      };
 
-      const res = await fetch("http://localhost:3000/api/order/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
-        body: JSON.stringify({
-          email: shippingInfo.email,
-          first_name: shippingInfo.firstName,
-          last_name: shippingInfo.lastName,
-          address_line: shippingInfo.address,
-          city: shippingInfo.city,
-          state: shippingInfo.state,
-          postal_code: shippingInfo.zipCode,
-          country: shippingInfo.country || "Romania",
-          total_ammount: finalTotal, 
-          payment_method: paymentMethod,
-          items: cartItems,
-        }),
-      });
+      // --- WORKFLOW 1: CREDIT CARD ---
+      if (paymentMethod === 'credit_card') {
+        
+        // 1. Check Stock
+        const stockRes = await fetch("http://localhost:3000/api/order/check_stock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: cartItems }),
+        });
 
-      const data = await res.json();
+        if (!stockRes.ok) {
+          const errorData = await stockRes.json();
+          throw new Error(errorData.error || "Some items are out of stock");
+        }
 
-      if (!res.ok) {
-        throw new Error(data.error || data.details || "Failed to place order");
-      }
+        // 2. Get Stripe URL
+        const paymentRes = await fetch("http://localhost:3000/api/order/payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: cartItems }),
+        });
+        const paymentData = await paymentRes.json();
+        
+        // 3. SAVE DATA TO LOCAL STORAGE (Critical Step!)
+        // We need this data to persist across the redirect
+        localStorage.setItem('pending_order_data', JSON.stringify(orderPayload));
 
-      // if (paymentMethod === 'credit_card' && data.url) {
-      //   window.location.href = data.url; 
-      // } else {
+        // 4. Redirect
+        if (paymentData.url) {
+            window.location.href = paymentData.url;
+        }
+
+      } 
+      // --- WORKFLOW 2: CASH ON DELIVERY ---
+      else {
+        // Direct placement for COD (as requested)
+        const res = await fetch("http://localhost:3000/api/order/place", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(orderPayload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || data.details || "Failed to place order");
+        }
+
         clearCart();
         toast.success("Order placed successfully!");
-        navigate("/"); 
-      // }
+        navigate("/");
+      }
 
     } catch (error: any) {
       console.error("Checkout Error:", error);
@@ -139,7 +160,6 @@ const CheckoutPage = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen">
@@ -209,6 +229,7 @@ const CheckoutPage = () => {
           <div className="grid gap-12 lg:grid-cols-3">
             {/* Form Section */}
             <div className="lg:col-span-2">
+              
               {/* Shipping Form */}
               {currentStep === 'shipping' && (
                 <motion.form
@@ -217,7 +238,6 @@ const CheckoutPage = () => {
                   onSubmit={handleShippingSubmit}
                   className="space-y-6"
                 >
-                   {/* ... (Shipping form content remains exactly the same) ... */}
                    <h2 className="font-heading text-2xl font-semibold">
                     Shipping Information
                   </h2>
@@ -325,7 +345,6 @@ const CheckoutPage = () => {
                     Payment Method
                   </h2>
 
-                  {/* 1. Payment Method Selector */}
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
@@ -354,7 +373,6 @@ const CheckoutPage = () => {
                     </button>
                   </div>
 
-                  {/* 2. Conditional Rendering for Credit Card Form */}
                   {paymentMethod === 'credit_card' ? (
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary/20 p-6 animate-in fade-in slide-in-from-top-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
@@ -363,12 +381,11 @@ const CheckoutPage = () => {
                       <div>
                         <h3 className="font-medium">Pay via Credit Card</h3>
                         <p className="text-sm text-muted-foreground">
-                          You will be redirected to another page to pay via Credit Card
+                          You will be redirected to Stripe to securely complete your payment.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    // 3. UI for Cash on Delivery
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary/20 p-6 animate-in fade-in slide-in-from-top-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
                         <Truck size={24} className="text-foreground" />
@@ -408,7 +425,6 @@ const CheckoutPage = () => {
                     Review Your Order
                   </h2>
 
-                  {/* Shipping Summary */}
                   <div className="border border-border p-6">
                     <div className="flex items-center gap-3">
                       <Truck size={20} />
@@ -425,7 +441,6 @@ const CheckoutPage = () => {
                     </p>
                   </div>
 
-                  {/* Payment Summary */}
                   <div className="border border-border p-6">
                     <div className="flex items-center gap-3">
                       {paymentMethod === 'credit_card' ? (
@@ -443,7 +458,6 @@ const CheckoutPage = () => {
                     </p>
                   </div>
 
-                  {/* Order Items */}
                   <div className="border border-border p-6">
                     <h3 className="font-medium">Order Items</h3>
                     <div className="mt-4 space-y-4">

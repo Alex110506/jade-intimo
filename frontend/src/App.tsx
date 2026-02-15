@@ -26,6 +26,7 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin.tsx";
 import AddProductPageAdmin from "./pages/admin/AddProductPageAdmin.tsx";
 import ProductListAdmin from "./pages/admin/ProductListAdmin.tsx";
 import ProductPageAdmin from "./pages/admin/ProductPageAdmin.tsx";
+import SuccessPage from "./pages/SucessPageOrder.tsx";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +156,7 @@ const App = () => {
                 <Route path="/product/:id" element={<ProductPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/success" element={<SuccessPage/>}/>
                 <Route
                   path="/login"
                   element={isAuthenticated ? <UserPage /> : <LoginPage />}

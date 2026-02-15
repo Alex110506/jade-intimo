@@ -210,6 +210,31 @@ const UserPage = () => {
     }
   };
 
+
+  const handleViewOrder=async (orderId:Number)=>{
+    try {
+      const res=await fetch(`http://localhost:3000/api/order/details/${orderId}`)
+      const data=await res.json()
+
+      if(!res.ok)
+        throw new Error(data.message || "Failed to get order details")
+
+      let newOrds=orders.map((item)=>{
+        if(item.id==orderId){
+          return {
+            ...item,
+            items:data.items
+          }
+        }else{
+          return item
+        }
+      })
+
+    } catch (error) {
+      
+    }
+  }
+
   return (
     <div className="min-h-screen bg-secondary/10">
       <Navbar />
