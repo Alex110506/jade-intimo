@@ -21,7 +21,7 @@ const SuccessPage = () => {
       const storedOrder = localStorage.getItem('pending_order_data');
       if (!storedOrder) {
         setStatus('error');
-        toast.error("Order data lost. Please contact support.");
+        toast.error("Datele comenzii s-au pierdut. Te rugăm să contactezi suportul.");
         return;
       }
 
@@ -56,17 +56,26 @@ const SuccessPage = () => {
     finalizeOrder();
   }, [sessionId]);
 
-  if (status === 'verifying') return <div>Verifying your payment...</div>;
-  if (status === 'error') return <div>Something went wrong. Please contact support.</div>;
+  if (status === 'verifying') return (
+    <div className="flex min-h-screen items-center justify-center">
+      <p className="text-lg font-medium">Se verifică plata...</p>
+    </div>
+  );
+  
+  if (status === 'error') return (
+    <div className="flex min-h-screen items-center justify-center text-red-600">
+      <p>Ceva nu a mers bine. Te rugăm să contactezi suportul.</p>
+    </div>
+  );
 
   return (
     <>
     <Navbar/>
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <h1 className="text-3xl font-bold text-green-600">Order Confirmed!</h1>
-      <p>Thank you for your purchase.</p>
-      <button onClick={() => navigate('/')} className="btn-primary mt-4">
-        Back to Home
+    <div className="flex flex-col items-center justify-center min-h-[60vh] pt-[100px]">
+      <h1 className="text-3xl font-bold text-green-600">Comandă Confirmată!</h1>
+      <p className="mt-2 text-muted-foreground">Îți mulțumim pentru cumpărături.</p>
+      <button onClick={() => navigate('/')} className="btn-primary mt-6">
+        Înapoi la Acasă
       </button>
     </div>
     <Footer/>

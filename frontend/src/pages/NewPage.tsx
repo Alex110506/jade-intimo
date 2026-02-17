@@ -63,9 +63,9 @@ const CategoryPage = () => {
   }, [products, gender, sortBy]);
 
   const breadcrumbElements = [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jade-intimo.com' },
-    { '@type': 'ListItem', position: 2, name: gender.charAt(0).toUpperCase() + gender.slice(1), item: `https://jade-intimo.com/${gender}` },
-    { '@type': 'ListItem', position: 3, name: 'Noutati', item: `https://jade-intimo.com/${gender}/noutati` },
+    { '@type': 'ListItem', position: 1, name: 'Acasă', item: 'https://jade-intimo.com' },
+    { '@type': 'ListItem', position: 2, name: gender === 'women' ? 'Femei' : 'Bărbați', item: `https://jade-intimo.com/${gender}` },
+    { '@type': 'ListItem', position: 3, name: 'Noutăți', item: `https://jade-intimo.com/${gender}/noutati` },
   ];
 
   return (
@@ -83,9 +83,13 @@ const CategoryPage = () => {
           <nav className="border-b border-border bg-secondary/30">
             <div className="container-custom py-4">
               <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-                <li><Link to="/" className="hover:text-foreground">Home</Link></li>
+                <li><Link to="/" className="hover:text-foreground">Acasă</Link></li>
                 <ChevronRight size={14} />
-                <li><Link to={`/${gender}`} className="capitalize hover:text-foreground">{gender}</Link></li>
+                <li>
+                  <Link to={`/${gender}`} className="capitalize hover:text-foreground">
+                    {gender === 'women' ? 'Femei' : 'Bărbați'}
+                  </Link>
+                </li>
                 <ChevronRight size={14} />
                 <li className="font-medium text-foreground">Noutăți</li>
               </ol>

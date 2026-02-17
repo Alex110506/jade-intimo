@@ -46,12 +46,12 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || (isLogin ? "Login failed" : "Registration failed"));
+        throw new Error(data.message || (isLogin ? "Autentificarea a eșuat" : "Înregistrarea a eșuat"));
       }
 
       setUser(data.user);
       
-      toast.success(isLogin ? `Welcome back, ${data.user.first_name || 'User'}!` : 'Account created successfully!');
+      toast.success(isLogin ? `Bine ai revenit, ${data.user.first_name || 'Utilizator'}!` : 'Cont creat cu succes!');
       navigate("/");
       localStorage.clear()
       location.reload()
@@ -75,12 +75,12 @@ const LoginPage = () => {
           >
             <div className="text-center">
               <h1 className="font-heading text-3xl font-semibold">
-                {isLogin ? 'Welcome Back' : 'Create Account'}
+                {isLogin ? 'Bine ai revenit' : 'Creează Cont'}
               </h1>
               <p className="mt-2 text-muted-foreground">
                 {isLogin
-                  ? 'Sign in to access your account'
-                  : 'Join us for exclusive offers and updates'}
+                  ? 'Intră în cont pentru a accesa profilul tău'
+                  : 'Alătură-te nouă pentru oferte exclusive și noutăți'}
               </p>
             </div>
 
@@ -89,7 +89,7 @@ const LoginPage = () => {
                 <>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-medium">First Name</label>
+                      <label className="mb-2 block text-sm font-medium">Prenume</label>
                       <input
                         type="text"
                         required
@@ -99,7 +99,7 @@ const LoginPage = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium">Last Name</label>
+                      <label className="mb-2 block text-sm font-medium">Nume</label>
                       <input
                         type="text"
                         required
@@ -111,7 +111,7 @@ const LoginPage = () => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">Phone</label>
+                    <label className="mb-2 block text-sm font-medium">Telefon</label>
                     <input
                       type="tel"
                       required
@@ -135,7 +135,7 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">Password</label>
+                <label className="mb-2 block text-sm font-medium">Parolă</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -160,17 +160,17 @@ const LoginPage = () => {
                 className="btn-primary w-full flex items-center justify-center gap-2"
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLogin ? 'Sign In' : 'Create Account'}
+                {isLogin ? 'Intră în cont' : 'Creează Cont'}
               </button>
 
               <p className="text-center text-sm text-muted-foreground">
-                {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+                {isLogin ? "Nu ai un cont?" : 'Ai deja un cont?'}{' '}
                 <button
                   type="button"
                   onClick={() => setIsLogin(!isLogin)}
                   className="font-medium text-foreground underline underline-offset-4"
                 >
-                  {isLogin ? 'Sign up' : 'Sign in'}
+                  {isLogin ? 'Înregistrează-te' : 'Intră în cont'}
                 </button>
               </p>
             </form>

@@ -127,34 +127,25 @@ export const retrieveProductById = async (productId) => {
 
 
 
-export const insertProduct = async ({
-    gender,
-    category,
-    subCategory = null,
-    name,
-    image = null,
-    description = null,
-    material = null,
-    price,
-    bigSizes = false,
-}) => {
+export const insertProduct = async (productData) => {
     try {
         const [created] = await db.insert(products).values({
-            gender,
-            category,
-            subCategory,
-            name,
-            image,
-            description,
-            material,
-            price,
-            bigSizes,
+            gender: productData.gender,
+            category: productData.category,
+            subCategory: productData.subCategory || null,
+            name: productData.name,
+            image: productData.image || null,
+            description: productData.description || null,
+            material: productData.material || null,
+            price: productData.price,
+            bigSizes: productData.bigSizes ?? false,
+            cod:productData.cod
         }).returning();
 
         return created;
     } catch (error) {
-        logger.error("Error creating product:", error);
-        throw new Error("Could not create product");
+        logger.error("Error inserting product into DB:", error);
+        throw new Error("Could not insert product record");
     }
 };
 

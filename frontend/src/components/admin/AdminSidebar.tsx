@@ -13,7 +13,10 @@ import {
   List
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from "../../assets/logo.webp"; // Ensure path is correct
+
+const domain=import.meta.env.VITE_CLOUDFLARE_DOMAIN
+
+const logo = `${domain}/logo.webp`;
 
 // Mock Data Structure for Admin (Replace with your real data later)
 const adminNavigation = [
@@ -30,7 +33,6 @@ const adminNavigation = [
     children: [
       { name: 'All Products', href: '/admin/products', icon: List },
       { name: 'Add Product', href: '/admin/products/new', icon: Plus },
-      { name: 'Categories', href: '/admin/categories', icon: List },
     ],
   },
   {

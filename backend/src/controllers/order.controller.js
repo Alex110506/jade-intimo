@@ -198,10 +198,23 @@ export const getOrdersController=async (req,res)=>{
 export const getOrderDetails=async (req,res)=>{
     try {
         const userId=req.user.id
-        const orderId=req.params.id
+        const orderId=Number(req.params.id)
 
-        const result=fetchDetails(userId,orderId)
+        console.log(userId,orderId)
+
+        const result=await fetchDetails(userId,orderId)
+
+        res.status(200).json(result)
     } catch (error) {
-        
+        logger.error(`Error getting order details:`, error);
+
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
     }
 }

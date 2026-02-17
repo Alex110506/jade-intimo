@@ -32,6 +32,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.990.0",
+    "@aws-sdk/s3-request-presigner": "^3.990.0",
     "@neondatabase/serverless": "^1.0.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -45,6 +47,7 @@
     "nodemon": "^3.1.11",
     "pg": "^8.16.3",
     "stripe": "^20.3.1",
+    "uuid": "^13.0.0",
     "winston": "^3.19.0",
     "ws": "^8.19.0",
     "zod": "^4.2.1"

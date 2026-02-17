@@ -56,7 +56,7 @@ const ProductPage = () => {
             setProduct(null);
             return;
           }
-          throw new Error('Failed to fetch product');
+          throw new Error('Eșec la încărcarea produsului');
         }
 
         const data = await response.json();
@@ -106,7 +106,7 @@ const ProductPage = () => {
     // Construim obiectul produsului pentru coș
     const cartItemToAdd: CartItem = {
       ...product,
-      variantId:selectedVariantId,
+      variantId: selectedVariantId,
       size: selectedSize,
       quantity: quantity,
     };
@@ -129,11 +129,10 @@ const ProductPage = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to add product to cart");
+          throw new Error(data.message || "Eșec la adăugarea produsului în coș");
         }
 
         // Succes API -> Adăugăm și în Zustand pentru update instant la UI (ex: numărul din iconița de coș)
-        // Alternativ, poți refetchui tot coșul de la API.
         addItem(cartItemToAdd);
         toast.success(`${product?.name} a fost adăugat în coș!`);
 
@@ -172,8 +171,8 @@ const ProductPage = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 py-20 text-center">
-          <h1 className="font-display text-3xl">Product Not Found</h1>
-          <Button onClick={() => navigate('/')} className="mt-8">Back to Home</Button>
+          <h1 className="font-display text-3xl">Produsul nu a fost găsit</h1>
+          <Button onClick={() => navigate('/')} className="mt-8">Înapoi la Acasă</Button>
         </main>
         <Footer />
       </div>
@@ -184,17 +183,21 @@ const ProductPage = () => {
     <div className="min-h-screen bg-background mt-32">
       <SEO
         title={`${product.name} | Jade Intimo`}
-        description={product.description || `Shop ${product.name} at Jade Intimo`}
+        description={product.description || `Cumpără ${product.name} la Jade Intimo`}
       />
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb ... same as before */}
+        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-            <li><Link to="/" className="hover:text-foreground">Home</Link></li>
+            <li><Link to="/" className="hover:text-foreground">Acasă</Link></li>
             <ChevronRight size={14} />
-            <li><Link to={`/${product.gender}`} className="capitalize hover:text-foreground">{product.gender}</Link></li>
+            <li>
+              <Link to={`/${product.gender}`} className="capitalize hover:text-foreground">
+                {product.gender === 'women' ? 'Femei' : 'Bărbați'}
+              </Link>
+            </li>
             <ChevronRight size={14} />
             <li className="text-foreground font-medium truncate max-w-[200px]">{product.name}</li>
           </ol>
@@ -217,45 +220,51 @@ const ProductPage = () => {
             <div>
               <h1 className="font-heading text-3xl lg:text-4xl font-semibold">{product.name}</h1>
               <div className="mt-6 flex items-center gap-4">
-                <span className="text-3xl font-semibold">${(Number(product.price) / 100).toFixed(2)}</span>
+                <span className="text-3xl font-semibold">{(Number(product.price) / 100).toFixed(2)} RON</span>
                 {product.originalPrice && (
                   <span className="text-xl text-muted-foreground line-through">
-                    ${Number(product.originalPrice / 100).toFixed(2)}
+                    {Number(product.originalPrice / 100).toFixed(2)} RON
                   </span>
                 )}
               </div>
             </div>
 
             <p className="text-muted-foreground leading-relaxed text-lg">
-              {product.description || "No description available."}
+              {product.description || "Nu există descriere disponibilă."}
             </p>
 
             {/* Size Selection */}
             {variants && variants.length > 0 && (
-              <div>
-                <div className="mb-3 flex items-center justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold uppercase tracking-wider">Alege Mărimea</h3>
-                  <button className="text-sm text-muted-foreground underline">Size Guide</button>
+                  {/* Poți adăuga link către ghidul de mărimi dacă există */}
+                  {/* <button className="text-sm text-muted-foreground underline">Ghid Mărimi</button> */}
                 </div>
+                
                 <div className="flex flex-wrap gap-3">
                   {variants.map((vari) => {
                     const isOutOfStock = vari.quantity === 0;
+                    const isSelected = selectedSize === vari.size;
+                    
                     return (
                       <button
                         key={vari.size}
                         onClick={() => {
-                          setSelectedSize(vari.size);
-                          setAvailable(vari.quantity);
-                          setSelectedVariantId(vari.id);
-                          setQuantity(1); // Reset quantity on size change
+                          if (!isOutOfStock) {
+                            setSelectedSize(vari.size);
+                            setAvailable(vari.quantity);
+                            setSelectedVariantId(vari.id);
+                            setQuantity(1); // Reset quantity on size change
+                          }
                         }}
                         disabled={isOutOfStock}
                         className={`min-w-[3.5rem] border px-4 py-3 text-sm font-medium transition-all 
                           ${isOutOfStock 
                             ? 'border-gray-200 text-gray-300 decoration-line-through cursor-not-allowed bg-gray-50'
-                            : selectedSize === vari.size 
-                              ? 'border-foreground bg-foreground text-background' 
-                              : 'border-border hover:border-foreground text-foreground'
+                            : isSelected 
+                              ? 'border-foreground bg-foreground text-background shadow-md' 
+                              : 'border-border hover:border-foreground text-foreground hover:shadow-sm'
                           }
                         `}
                       >
@@ -264,12 +273,13 @@ const ProductPage = () => {
                     );
                   })}
                 </div>
-                {/* Stock info */}
+
+                {/* Stock info message */}
                 {selectedSize && (
-                  <div className="mt-3 text-sm font-medium">
+                  <div className="text-sm font-medium animate-in fade-in slide-in-from-top-1">
                      {available >= 5 
-                       ? <span className="text-green-600">În Stoc</span> 
-                       : <span className="text-orange-500">Stoc Limitat ({available})</span>
+                       ? <span className="text-green-600 flex items-center gap-1">✓ În Stoc</span> 
+                       : <span className="text-orange-500 flex items-center gap-1">⚠ Stoc Limitat (doar {available} buc.)</span>
                      }
                   </div>
                 )}
@@ -277,28 +287,39 @@ const ProductPage = () => {
             )}
 
             {/* Quantity & Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border">
-              <div className="flex items-center border border-border w-max">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+              <div className="flex items-center border border-border rounded-md w-max">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 py-3 hover:bg-secondary text-lg"
-                >-</button>
-                <span className="px-4 py-3 min-w-[3rem] text-center font-medium">{quantity}</span>
+                  disabled={!selectedSize}
+                  className="px-4 py-3 hover:bg-secondary text-lg disabled:opacity-50"
+                  aria-label="Decrease quantity"
+                >−</button>
+                <span className="px-4 py-3 min-w-[3rem] text-center font-medium select-none">{quantity}</span>
                 <button
                   onClick={() => setQuantity(Math.min(available || 99, quantity + 1))}
-                  className="px-4 py-3 hover:bg-secondary text-lg"
+                  disabled={!selectedSize || quantity >= available}
+                  className="px-4 py-3 hover:bg-secondary text-lg disabled:opacity-50"
+                  aria-label="Increase quantity"
                 >+</button>
               </div>
               
-              <Button onClick={handleAddToCart} disabled={loading ? true : false} className="flex-1 h-auto py-4 text-sm font-bold uppercase">
+              <Button 
+                onClick={handleAddToCart} 
+                disabled={loading || (variants?.length > 0 && !selectedSize)} 
+                className="flex-1 h-auto py-4 text-sm font-bold uppercase tracking-wide"
+              >
+                {loading ? <Loader2 className="animate-spin mr-2" /> : null}
                 Adaugă în coș
               </Button>
             </div>
             
-            {/* Details & Material Sections */}
-            <div className="space-y-4 pt-6">
-               {/* ... (restul detaliilor) */}
-            </div>
+            {/* Additional Details (Material, Care, etc.) - Optional Placeholder */}
+            {product.material && (
+                <div className="space-y-4 pt-6 text-sm text-muted-foreground">
+                    <p><span className="font-semibold text-foreground">Material:</span> {product.material}</p>
+                </div>
+            )}
           </div>
         </div>
       </main>

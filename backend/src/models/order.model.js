@@ -1,7 +1,7 @@
 import { integer, pgTable, serial, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
 import { users } from "./user.model.js";
 
-export const orderStatusEnum = pgEnum('order_status', ['shipping', 'cancelled']);
+export const orderStatusEnum = pgEnum('order_status', ['pending','shipping','cancelled']);
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
@@ -9,7 +9,7 @@ export const orders = pgTable("orders", {
   user_id: integer('user_id')
     .references(() => users.id),
 
-  status: orderStatusEnum('status').default('shipping').notNull(),
+  status: orderStatusEnum('status').default('pending').notNull(),
 
   total_ammount: integer('total_ammount').notNull(),
   shipping_cost:integer('shipping_cost').default(0),

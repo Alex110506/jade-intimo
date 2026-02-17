@@ -48,5 +48,6 @@ export const products = pgTable("products", {
   price: integer("price").notNull(), 
   bigSizes: boolean("big_sizes").notNull().default(false),
   soldPieces: integer("sold_pieces").notNull().default(0),
+  cod:varchar("cod",{length:64}).notNull(),
   created_at: timestamp().defaultNow().notNull()
 });

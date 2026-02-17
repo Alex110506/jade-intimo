@@ -4,7 +4,9 @@ import { orderItems } from "#models/order-items.model.js";
 import { product_variants } from "#models/product-variant.model.js";
 import { carts } from "#models/cart.model.js"; 
 import { cart_items } from "#models/cart-items.model.js";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { products } from "#models/product.model.js";
+import logger from "#config/logger.js";
 
 const createOrder = async ({
     user_id,
@@ -42,7 +44,7 @@ const createOrder = async ({
                     state,
                     postal_code,
                     country,
-                    status: 'shipping',
+                    status: 'pending',
                     shipping_cost
                 })
                 .returning({ id: orders.id });
@@ -134,35 +136,44 @@ const getOrdersByUserId = async (userId) => {
 };
 
 
-const fetchDetails=async (userId,orderId)=>{
+const fetchDetails = async (userId, orderId) => {
     try {
-        const order=await db
+        const [order] = await db
             .select()
             .from(orders)
             .where(
                 and(
-                    eq(orders.id,orderId),
-                    eq(orders.user_id,userId)
+                    eq(orders.id, orderId),
+                    eq(orders.user_id, userId)
                 )                
-            )
+            );
 
-        if(!order){
-            throw new Error("No order found...")
+        if (!order) {
+            throw new Error("Order not found or access denied.");
         }
 
-        const dbItems = await db
+        const orderProds = await db
             .select({
-                variantId: product_variants.id,
+                id: orderItems.id,
+                quantity: orderItems.quantity,
+                price: orderItems.price_at_purchase,
                 size: product_variants.size,
                 productName: products.name,
-                price: orderItems.price_at_purchase,
-                quantity:orderItems.quantity
+                image: products.image
             })
-            .from(product_variants)
+            .from(orderItems)
+            .leftJoin(product_variants, eq(orderItems.variant_id, product_variants.id))
             .leftJoin(products, eq(product_variants.product_id, products.id))
-            .where(inArray(product_variants.id, variantIds));
+            .where(eq(orderItems.order_id, orderId));
+
+        return {
+            ...order,
+            items: orderProds
+        };
+
     } catch (error) {
-        
+        logger.error(`FetchDetails Error: ${error.message}`);
+        throw error;
     }
 }
 
