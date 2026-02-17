@@ -2,8 +2,11 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight,ArrowBigDownDash } from 'lucide-react';
 import { useGender } from '@/context/GenderContext';
-import heroWomen from '@/assets/hero-women.jpg';
-import heroMen from '@/assets/hero-men.jpg';
+
+const domain=import.meta.env.VITE_CLOUDFLARE_DOMAIN
+
+const heroWomen = `${domain}/hero-women.jpg`
+const heroMen=`${domain}/men.png`
 
 const Hero = () => {
   const { gender } = useGender();

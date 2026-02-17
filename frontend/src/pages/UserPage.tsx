@@ -9,22 +9,40 @@ import {
   Check, 
   ChevronRight,
   Mail,
-  Phone,
-  User as UserIcon,
-  X
+  Phone
 } from "lucide-react";
 import { toast } from "sonner";
-import useAuthStore from "@/hooks/use-authstore.ts";
-import { useCartStore } from "@/hooks/use-cartstore.ts";
+import useAuthStore from "@/hooks/use-authstore";
+import { useCartStore } from "@/hooks/use-cartstore";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 
-// Mock data for orders
-const MOCK_ORDERS = [
-  { id: "ORD-92831", date: "2025-11-12", status: "Delivered", total: 245.00 },
-  { id: "ORD-88210", date: "2025-12-05", status: "Processing", total: 120.50 },
-];
+export interface OrderItem {
+  id: number;
+  productName: string;
+  image: string | null;
+  size: string;
+  quantity: number;
+  price: number; 
+}
+
+export interface Order {
+  id: number;
+  status: 'pending' | 'paid' | 'shipping' | 'cancelled' | 'delivered' | 'refunded';
+  total_ammount: number; 
+  shipping_cost: number | null;
+  created_at: string;
+  // Optional fields that get populated after fetching details
+  items?: OrderItem[];
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  address_line?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+}
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -41,6 +59,10 @@ const UserPage = () => {
   // New States for Profile Editing
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // New State for Real Orders
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
 
   // --- Forms State ---
   const [addressForm, setAddressForm] = useState({
@@ -80,6 +102,36 @@ const UserPage = () => {
     }
   }, [user]);
 
+  // Fetch Orders Implementation
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/order/get", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", 
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        const data = await response.json();
+        const ordersData = data.result || [];
+        setOrders(ordersData);
+
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
+
   // --- Handlers ---
 
   const handleLogout = async () => {
@@ -107,7 +159,6 @@ const UserPage = () => {
     setIsSavingProfile(true);
 
     try {
-      // Assuming PUT for updates
       const response = await fetch("http://localhost:3000/api/auth/updateData", {
         method: "PATCH", 
         headers: { "Content-Type": "application/json" },
@@ -117,14 +168,9 @@ const UserPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update profile");
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to update profile");
 
-      // Update Zustand with new user data
-      // Backend must return the updated user object in 'data.user'
       setUser(data.user); 
-      
       setIsEditingProfile(false);
       toast.success("Profile updated successfully");
     } catch (err: any) {
@@ -153,9 +199,7 @@ const UserPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to save address");
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to save address");
       
       setAddress(data.address);
       setIsEditingAddress(false);
@@ -173,6 +217,58 @@ const UserPage = () => {
     return "U";
   };
 
+  const handleViewOrder = async (orderId: number) => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/order/details/${orderId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      
+      const data = await res.json();
+
+      if (!res.ok)
+        throw new Error(data.message || "Failed to get order details");
+
+      const newOrds = orders.map((item) => {
+        if (item.id === orderId) {
+          return {
+            ...item,
+            items: data.items,
+            email: data.email,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            address_line: data.address_line,
+            city: data.city,
+            state: data.state,
+            postal_code: data.postal_code,
+          };
+        } else {
+          return item;
+        }
+      });
+
+      setOrders(newOrds);
+
+    } catch (error: any) {
+      console.error("Error fetching order details:", error);
+      toast.error(error.message || "Could not load order details");
+    }
+  };
+
+  // Helper to collapse an order (clear its details locally)
+  const handleHideOrder = (orderId: number) => {
+    const newOrds = orders.map((item) => {
+      if (item.id === orderId) {
+        return { ...item, items: undefined };
+      }
+      return item;
+    });
+    setOrders(newOrds);
+  };
+
   return (
     <div className="min-h-screen bg-secondary/10">
       <Navbar />
@@ -182,10 +278,8 @@ const UserPage = () => {
           {/* LEFT COLUMN: Profile & Address */}
           <div className="space-y-6">
             
-            {/* --- PROFILE CARD --- */}
+            {/* PROFILE CARD */}
             <div className="bg-background p-6 border border-border rounded-lg shadow-sm">
-              
-              {/* Profile Header & Edit Button */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 rounded-full bg-pink/20 flex items-center justify-center text-pink-accent text-xl font-bold border border-pink/30">
@@ -212,7 +306,6 @@ const UserPage = () => {
                 )}
               </div>
 
-              {/* Profile Form / Display */}
               {isEditingProfile ? (
                 <form onSubmit={handleSaveProfile} className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
@@ -237,7 +330,6 @@ const UserPage = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="text-xs font-medium text-muted-foreground ml-1">Phone Number</label>
                     <input
@@ -248,8 +340,6 @@ const UserPage = () => {
                       required
                     />
                   </div>
-
-                  {/* Read Only Email */}
                   <div>
                     <label className="text-xs font-medium text-muted-foreground ml-1">Email (Cannot be changed)</label>
                     <input
@@ -258,7 +348,6 @@ const UserPage = () => {
                       className="w-full text-sm border border-border bg-secondary/30 p-2 rounded text-muted-foreground cursor-not-allowed"
                     />
                   </div>
-
                   <div className="flex gap-2 pt-2">
                     <Button type="submit" disabled={isSavingProfile} className="flex-1 text-xs py-2 h-auto">
                       {isSavingProfile ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check size={14} className="mr-1" />}
@@ -274,7 +363,6 @@ const UserPage = () => {
                   </div>
                 </form>
               ) : (
-                // Display Mode
                 <div className="space-y-4 border-t border-border pt-4">
                   <div className="flex items-center gap-3 text-sm group">
                     <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
@@ -285,7 +373,6 @@ const UserPage = () => {
                       <p className="font-medium truncate max-w-[200px]" title={user?.email}>{user?.email}</p>
                     </div>
                   </div>
-
                   <div className="flex items-center gap-3 text-sm group">
                     <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
                       <Phone size={14} />
@@ -308,7 +395,7 @@ const UserPage = () => {
               </button>
             </div>
 
-            {/* --- ADDRESS CARD --- */}
+            {/* ADDRESS CARD */}
             <div className="bg-background p-6 border border-border rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -385,30 +472,169 @@ const UserPage = () => {
                 <h2 className="text-xl font-semibold">Order History</h2>
               </div>
 
-              {MOCK_ORDERS.length > 0 ? (
+              {isLoadingOrders ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                  <p>Loading your orders...</p>
+                </div>
+              ) : orders.length > 0 ? (
                 <div className="space-y-4">
-                  {MOCK_ORDERS.map((order) => (
-                    <div key={order.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-border rounded-lg hover:border-pink/50 transition-colors gap-4 bg-secondary/5">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-xs font-bold text-foreground uppercase tracking-wider">{order.id}</p>
-                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
-                            order.status === 'Delivered' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
-                          }`}>
-                            {order.status}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Placed on {order.date}</p>
-                        <p className="text-sm font-bold mt-2">${order.total.toFixed(2)}</p>
-                      </div>
-                      <button 
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                        className="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground transition-all group"
+                  {orders.map((order) => {
+                    // 1. Calculations
+                    const totalCents = Number(order.total_ammount);
+                    const shippingCents = Number(order.shipping_cost || 0);
+                    const finalDollars = (totalCents + shippingCents) / 100;
+
+                    // 2. Check if this specific order has details loaded
+                    const showDetails = order.items && order.items.length > 0;
+
+                    return (
+                      <div 
+                        key={order.id} 
+                        className="flex flex-col border border-border rounded-lg bg-secondary/5 transition-all hover:border-pink/50"
                       >
-                        View Details <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </button>
-                    </div>
-                  ))}
+                        {/* --- TOP SECTION (Always Visible) --- */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                #{order.id}
+                              </p>
+                              {/* Dynamic Status Badge */}
+                              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
+                                order.status === 'paid' ? 'bg-green-100 text-green-700 border-green-200' :
+                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                'bg-gray-100 text-gray-700 border-gray-200'
+                              }`}>
+                                {order.status}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Placed on {new Date(order.created_at).toLocaleDateString()}
+                            </p>
+
+                            {/* Price Display */}
+                            <div className="mt-2 flex flex-col">
+                              <p className="text-sm font-bold">
+                                ${finalDollars.toFixed(2)}
+                              </p>
+                              {shippingCents > 0 ? (
+                                <span className="text-[10px] text-muted-foreground">
+                                  (Includes ${(shippingCents / 100).toFixed(2)} shipping)
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-muted-foreground">
+                                  (Free Shipping)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Action Button */}
+                          <button
+                            onClick={() => {
+                              if (showDetails) {
+                                handleHideOrder(order.id);
+                              } else {
+                                handleViewOrder(order.id);
+                              }
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground transition-all group h-fit self-start md:self-center"
+                          >
+                            {showDetails ? "Hide Details" : "View Details"}
+                            <ChevronRight 
+                              size={14} 
+                              className={`text-muted-foreground transition-transform duration-300 ${showDetails ? "rotate-90" : ""}`} 
+                            />
+                          </button>
+                        </div>
+
+                        {/* --- EXPANDED DETAILS SECTION (Conditionally Rendered) --- */}
+                        {showDetails && order.items && (
+                          <div className="border-t border-border bg-secondary/10 p-4 animate-in fade-in slide-in-from-top-2">
+                            <div className="grid gap-6 md:grid-cols-2">
+                              
+                              {/* Column 1: Order Items */}
+                              <div>
+                                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                  Items ({order.items.length})
+                                </h4>
+                                <div className="space-y-3">
+                                  {order.items.map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-3">
+                                      {/* Product Image */}
+                                      <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-border bg-white">
+                                        {item.image ? (
+                                          <img src={item.image} alt={item.productName} className="h-full w-full object-cover" />
+                                        ) : (
+                                          <div className="flex h-full w-full items-center justify-center bg-gray-100 text-[10px]">No Img</div>
+                                        )}
+                                      </div>
+                                      
+                                      {/* Product Info */}
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium leading-none">{item.productName}</p>
+                                        <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
+                                          <span>Size: {item.size}</span>
+                                          <span>Qty: {item.quantity}</span>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Price */}
+                                      <p className="text-sm font-medium">
+                                        ${((item.price * item.quantity) / 100).toFixed(2)}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Column 2: Shipping & Payment Info */}
+                              <div className="space-y-6 md:border-l md:border-border md:pl-6">
+                                
+                                {/* Shipping Address */}
+                                {order.address_line && (
+                                  <div>
+                                    <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                      Shipping Address
+                                    </h4>
+                                    <div className="text-sm">
+                                      <p className="font-medium">{order.first_name} {order.last_name}</p>
+                                      <p className="text-muted-foreground">{order.address_line}</p>
+                                      <p className="text-muted-foreground">
+                                        {order.city}, {order.state} {order.postal_code}
+                                      </p>
+                                      <p className="mt-1 text-xs text-muted-foreground">{order.email}</p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Payment Breakdown */}
+                                <div>
+                                  <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                      Payment Summary
+                                  </h4>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span>${(totalCents / 100).toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Shipping</span>
+                                    <span>${(shippingCents / 100).toFixed(2)}</span>
+                                  </div>
+                                  <div className="mt-2 flex justify-between border-t border-border pt-2 font-bold">
+                                    <span>Total Paid</span>
+                                    <span>${finalDollars.toFixed(2)}</span>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center">

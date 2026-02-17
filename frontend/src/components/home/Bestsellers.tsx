@@ -29,10 +29,10 @@ const Bestsellers = ({ products }) => {
         >
           <div>
             <h2 className="font-heading text-3xl font-semibold md:text-4xl">
-              Bestsellers
+              Cele mai vândute
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Customer favorites you'll love
+              Produsele favorite ale clienților pe care le vei adora
             </p>
           </div>
         </motion.div>

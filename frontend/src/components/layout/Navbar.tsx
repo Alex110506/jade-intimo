@@ -4,8 +4,11 @@ import { Search,LockKeyhole, ShoppingBag, User, Menu, X, ChevronDown, ChevronRig
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
 import { navigationData } from '@/data/navigation';
-import logo from "../../assets/logo.webp";
 import useAuthStore from '@/hooks/use-authstore';
+
+const domain=import.meta.env.VITE_CLOUDFLARE_DOMAIN
+
+const logo = `${domain}/logo.webp`
 
 // 1. Importăm noul store Zustand
 import { useCartStore } from '@/hooks/use-cartstore';
@@ -25,6 +28,7 @@ const Navbar = () => {
   const categories = gender === 'women' ? navigationData.women : navigationData.men;
 
   const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
+  const user=useAuthStore((state)=>state.user)
 
 
   const handleCategoryHover = (slug: string | null) => {
@@ -161,7 +165,7 @@ const Navbar = () => {
               >
                 <User size={20} />
               </Link>
-              {isAuthenticated && (<Link
+              {(isAuthenticated && user.role==="admin") && (<Link
                 to="/admin"
                 className="p-2 transition-opacity duration-base hover:opacity-70 md:block"
                 aria-label="Admin"

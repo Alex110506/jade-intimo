@@ -1,11 +1,19 @@
 import logger from "#config/logger.js";
-import { createOrder } from "#services/order.service.js";
+import { createOrder, fetchDetails, getOrdersByUserId, verifyStock } from "#services/order.service.js";
+import { createPaymentSession } from "#services/payment.service.js";
 import { formatValidationError } from "#utils/format.js";
 import { createOrderSchema } from "#validations/order.validation.js";
+import { db } from "#config/database.js";
+import { orders } from "#models/order.model.js";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_API_KEY);
 
 export const placeOrderController = async (req, res) => {
     try {
+        // 1. User Authentication (Extract ID from token)
         const token = req.cookies.token;
         let user_id = null;
 
@@ -20,6 +28,7 @@ export const placeOrderController = async (req, res) => {
     
         const body = req.body; 
 
+        // 2. Validate Body Structure (Zod)
         const result = createOrderSchema.safeParse(body);
 
         if (!result.success) {
@@ -30,10 +39,64 @@ export const placeOrderController = async (req, res) => {
         }
 
         const orderData = result.data;
+        
+        const stripeSessionId = body.stripe_session_id || null;
 
+        // 3. SECURITY & PAYMENT VERIFICATION
+        if (orderData.payment_method === 'credit_card') {
+            
+            // A. Check if Session ID is present
+            if (!stripeSessionId) {
+                return res.status(400).json({ 
+                    error: "Payment Verification Failed", 
+                    message: "Missing Stripe Session ID" 
+                });
+            }
+
+            // B. IDEMPOTENCY CHECK (Critical)
+            // Prevent creating a duplicate order if the user refreshes the Success page
+            const existingOrder = await db
+                .select()
+                .from(orders)
+                .where(eq(orders.stripe_payment_id, stripeSessionId));
+
+            if (existingOrder.length > 0) {
+                logger.info(`Duplicate order attempt blocked for session ${stripeSessionId}`);
+                return res.status(200).json({
+                    message: "Order already processed",
+                    id: existingOrder[0].id
+                });
+            }
+
+            // C. Verify Payment Status with Stripe
+            try {
+                const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+                
+                if (session.payment_status !== 'paid') {
+                    logger.warn(`Unpaid session attempt: ${stripeSessionId}`);
+                    return res.status(402).json({ 
+                        error: "Payment Required", 
+                        message: "The payment has not been confirmed by Stripe." 
+                    });
+                }
+            } catch (stripeError) {
+                logger.error("Stripe retrieval failed:", stripeError);
+                return res.status(400).json({ 
+                    error: "Payment Verification Failed", 
+                    message: "Invalid Session ID" 
+                });
+            }
+        }
+
+        // 4. Fail Fast: Check Stock (Before Database Transaction)
+        // Note: createOrder service performs a locked check, but this saves DB resources.
+        await verifyStock(orderData.items);
+
+        // 5. Create Order
         const insertResult = await createOrder({
             ...orderData,
-            user_id: user_id
+            user_id: user_id,
+            stripe_payment_id: stripeSessionId 
         });        
 
         if (!insertResult) {
@@ -45,7 +108,7 @@ export const placeOrderController = async (req, res) => {
 
         logger.info(`Order with id ${insertResult.orderId} placed successfully`);
 
-        // TODO: Email Service Trigger Here
+        // TODO: Email Service Trigger Here (Order Confirmation)
 
         return res.status(201).json({
             message: "Order placed successfully",
@@ -54,9 +117,104 @@ export const placeOrderController = async (req, res) => {
 
     } catch (error) {
         logger.error(`Error placing order:`, error);
+
+        if (error.message.includes("Insufficient stock") || error.message.includes("Product variant")) {
+            return res.status(409).json({ 
+                error: "Inventory Error",
+                message: error.message 
+            });
+        }
+
         return res.status(500).json({ 
             error: 'Internal server error',
             message: error.message 
         });
     }
 };
+
+export const checkStock=async (req,res)=>{
+    try {
+        const items=req.body.items
+        await verifyStock(items)
+
+        return res.status(200).json({
+            message:"all items in stock!"
+        })
+    } catch (error) {
+        logger.error(`Error verifying stock:`, error);
+
+        if (error.message.includes("Insufficient stock") || error.message.includes("Product variant")) {
+            return res.status(409).json({ // 409 = Conflict
+                error: "Inventory Error",
+                message: error.message 
+            });
+        }
+
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}
+
+export const payOrder = async (req, res) => {
+    try {
+        const { items } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).json({ error: "No items provided" });
+        }
+
+        const paymentUrl = await createPaymentSession({ items });
+
+        return res.status(200).json({ url: paymentUrl });
+
+    } catch (error) {
+        logger.error("Payment Controller Error:", error);
+        return res.status(500).json({ 
+            error: "Failed to initialize payment",
+            details: error.message 
+        });
+    }
+};
+
+export const getOrdersController=async (req,res)=>{
+    try {
+        const userId=req.user.id
+        const result=await getOrdersByUserId(userId)
+        
+        return res.status(200).json({
+            result
+        })
+    } catch (error) {
+        logger.error(`Error getting orders:`, error);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}
+
+export const getOrderDetails=async (req,res)=>{
+    try {
+        const userId=req.user.id
+        const orderId=Number(req.params.id)
+
+        console.log(userId,orderId)
+
+        const result=await fetchDetails(userId,orderId)
+
+        res.status(200).json(result)
+    } catch (error) {
+        logger.error(`Error getting order details:`, error);
+
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}

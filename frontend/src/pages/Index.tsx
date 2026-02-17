@@ -45,14 +45,14 @@ const Index = () => {
   const homeSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'Jade Intimo - Premium Intimates & Loungewear',
-    description: 'Discover luxurious intimates, lingerie, and loungewear.',
+    name: 'Jade Intimo - Lenjerie Intimă & Loungewear Premium',
+    description: 'Descoperă lenjerie intimă de lux și ținute de casă confortabile.',
     url: 'https://jade-intimo.com',
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Women\'s Collection', url: 'https://jade-intimo.com/women' },
-        { '@type': 'ListItem', position: 2, name: 'Men\'s Collection', url: 'https://jade-intimo.com/men' },
+        { '@type': 'ListItem', position: 1, name: 'Colecția pentru Femei', url: 'https://jade-intimo.com/women' },
+        { '@type': 'ListItem', position: 2, name: 'Colecția pentru Bărbați', url: 'https://jade-intimo.com/men' },
       ],
     },
   };
@@ -60,8 +60,8 @@ const Index = () => {
   return (
     <>
       <SEO 
-        title="Jade Intimo | Premium Intimates & Loungewear"
-        description="Shop bras, panties, pajamas, and swimwear with free shipping over $100."
+        title="Jade Intimo | Lenjerie Intimă & Loungewear Premium"
+        description="Cumpără sutiene, chiloți, pijamale și costume de baie. Transport gratuit la comenzi peste 100 RON."
         url="https://jade-intimo.com"
         schema={homeSchema}
       />

@@ -26,6 +26,8 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin.tsx";
 import AddProductPageAdmin from "./pages/admin/AddProductPageAdmin.tsx";
 import ProductListAdmin from "./pages/admin/ProductListAdmin.tsx";
 import ProductPageAdmin from "./pages/admin/ProductPageAdmin.tsx";
+import SuccessPage from "./pages/SucessPageOrder.tsx";
+import EditVariantPage from "./pages/admin/EditVariantPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +157,7 @@ const App = () => {
                 <Route path="/product/:id" element={<ProductPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/success" element={<SuccessPage/>}/>
                 <Route
                   path="/login"
                   element={isAuthenticated ? <UserPage /> : <LoginPage />}
@@ -168,7 +171,8 @@ const App = () => {
                   <Route path="products">
                     <Route index element={<ProductListAdmin/>}></Route>
                     <Route path=":id" element={<ProductPageAdmin/>}></Route>
-                    <Route path="add" element={<AddProductPageAdmin/>}></Route>
+                    <Route path="variant/:id" element={<EditVariantPage/>}/>
+                    <Route path="new" element={<AddProductPageAdmin/>}></Route>
                   </Route>
                   
                   {/* <Route path="orders">

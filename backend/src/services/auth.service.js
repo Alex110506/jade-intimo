@@ -146,7 +146,7 @@ export const createAdress=async ({
         country:addresses.country,
         created_at:addresses.created_at
       })
-    logger.info(`address ${newAdress.id} created by user ${user_id} successfully`)
+    logger.info(`address ${newAddress.id} created by user ${user_id} successfully`)
     return newAddress
   } catch (error) {
     logger.error('error creating the address', error);

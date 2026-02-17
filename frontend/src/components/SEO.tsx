@@ -15,6 +15,8 @@ const defaultDescription = 'Discover luxurious intimates, lingerie, and loungewe
 const defaultImage = 'https://lovable.dev/opengraph-image-p98pqg.png';
 const siteUrl = 'https://jade-intimo.com';
 
+const domain=import.meta.env.VITE_CLUDFLARE_DOMAIN;
+
 const SEO = ({
   title = defaultTitle,
   description = defaultDescription,
@@ -44,7 +46,7 @@ const SEO = ({
     '@type': 'Organization',
     name: 'Jade Intimo',
     url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
+    logo: `${domain}/logo.webp`,
     sameAs: [
       'https://instagram.com/jade-intimo',
       'https://facebook.com/jade-intimo',
