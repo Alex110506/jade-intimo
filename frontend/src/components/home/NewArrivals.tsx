@@ -20,7 +20,7 @@ const NewArrivals = ({ products }) => {
   if (displayProducts.length === 0) return null;
 
   return (
-    <section className="section-padding bg-secondary/30">
+    <section className="p-12 bg-secondary/30">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

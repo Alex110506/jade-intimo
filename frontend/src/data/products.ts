@@ -20,7 +20,8 @@ export interface Product {
   details?: string[];
   material?: string;
   soldPieces:number,
-  bigSizes:boolean
+  bigSizes:boolean,
+  image_list:string[]
 }
 
 

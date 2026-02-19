@@ -23,11 +23,14 @@ import NewPage from "./pages/NewPage.tsx";
 
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import DashboardAdmin from "./pages/admin/DashboardAdmin.tsx";
-import AddProductPageAdmin from "./pages/admin/AddProductPageAdmin.tsx";
+import AddProductPageAdmin from "./pages/admin/AddProductPageAdmin.jsx";
 import ProductListAdmin from "./pages/admin/ProductListAdmin.tsx";
 import ProductPageAdmin from "./pages/admin/ProductPageAdmin.tsx";
 import SuccessPage from "./pages/SucessPageOrder.tsx";
 import EditVariantPage from "./pages/admin/EditVariantPage.tsx";
+import OrderListAdmin from "./pages/admin/OrderListAdmin.tsx";
+import OrderDetailsAdmin from "./pages/admin/OrderDetailsAdmin.tsx";
+import SearchPage from "./pages/SearchPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +140,7 @@ const App = () => {
                 {/* Women's Section */}
                 <Route path="/women">
                   <Route index element={<GenderPage />} />
+                  <Route path="cauta" element={<SearchPage/>}/>
                   <Route path="noutati" element={<NewPage />} />
                   <Route path=":category">
                     <Route index element={<CategoryPage />} />
@@ -147,6 +151,7 @@ const App = () => {
                 {/* Men's Section */}
                 <Route path="/men">
                   <Route index element={<GenderPage />} />
+                  <Route path="cauta" element={<SearchPage/>}/>
                   <Route path="noutati" element={<NewPage />} />
                   <Route path=":category">
                     <Route index element={<CategoryPage />} />
@@ -174,10 +179,11 @@ const App = () => {
                     <Route path="variant/:id" element={<EditVariantPage/>}/>
                     <Route path="new" element={<AddProductPageAdmin/>}></Route>
                   </Route>
+                  <Route path="orders">
+                    <Route index element={<OrderListAdmin/>}/>
+                    <Route path=":id" element={<OrderDetailsAdmin/>}/>
+                  </Route>
                   
-                  {/* <Route path="orders">
-
-                  </Route> */}
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

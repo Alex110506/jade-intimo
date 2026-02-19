@@ -28,6 +28,8 @@ export const createProductSchema = z.object({
   // Image is a URL string, optional
   image: z.string().optional().nullable(), 
   
+  image_list: z.array(z.string()).optional().nullable(),
+  
   cod: z.string().trim().max(64)
 });
 

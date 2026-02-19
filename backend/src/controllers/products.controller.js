@@ -14,7 +14,7 @@ import { eq } from "drizzle-orm";
 
 export const getProducts = async (req, res) => {
     try {
-        const { page, limit, gender, category, subCategory ,sortBy} = req.query;
+        const { page, limit, gender, category, subCategory ,sortBy,keyword} = req.query;
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
@@ -25,7 +25,8 @@ export const getProducts = async (req, res) => {
             gender, 
             category, 
             subCategory,
-            sortBy
+            sortBy,
+            keyword
         );
 
         logger.info(`Products retrieved successfully - Page: ${pageNum}`);
@@ -164,6 +165,8 @@ export const createProductAdmin = async (req, res) => {
 
         // 2. Validate
         const result = createProductSchema.safeParse(body);
+
+        console.log(result)
 
         if (!result.success) {
             // Log full error for debugging

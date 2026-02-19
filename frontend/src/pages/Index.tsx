@@ -73,7 +73,7 @@ const Index = () => {
           
           {/* Passing the data from Zustand to components */}
           <NewArrivals products={newArrivals}/>
-          <Bestsellers products={bestSellers}/>
+          
         </main>
         <Footer />
       </div>

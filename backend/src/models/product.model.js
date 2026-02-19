@@ -43,6 +43,7 @@ export const products = pgTable("products", {
   subCategory: subCategoryEnum("subcategory"),
   name: varchar("name", { length: 255 }).notNull(),
   image: text("image"),
+  image_list: text("image_list").array(),
   description: text("description"),
   material: varchar("material", { length: 100 }),
   price: integer("price").notNull(), 

@@ -16,9 +16,9 @@ export default function CreateProduct() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // Image States
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  // Image States (Changed to Arrays to support multiple)
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   // Form Data State
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ export default function CreateProduct() {
     description: '',
     material: '',
     price: '',
-    gender: 'women', // Default value matching your data keys
+    gender: 'women',
     category: '',
     subCategory: '',
     bigSizes: false,
@@ -35,12 +35,10 @@ export default function CreateProduct() {
 
   // --- DERIVED DATA ---
   
-  // 1. Get Categories based on selected Gender
   const availableCategories = useMemo(() => {
     return navigationData[formData.gender] || [];
   }, [formData.gender]);
 
-  // 2. Get Subcategories based on selected Category
   const availableSubcategories = useMemo(() => {
     const categoryObj = availableCategories.find(c => c.slug === formData.category);
     return categoryObj?.subcategories || [];
@@ -49,13 +47,11 @@ export default function CreateProduct() {
 
   // --- HANDLERS ---
 
-  // Generic Input Handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Gender Change: Resets Category & SubCategory
   const handleGenderChange = (e) => {
     const newGender = e.target.value;
     const genderCategories = navigationData[newGender] || [];
@@ -63,13 +59,11 @@ export default function CreateProduct() {
     setFormData((prev) => ({
       ...prev,
       gender: newGender,
-      // Automatically select the first category to be helpful, or leave empty
       category: genderCategories.length > 0 ? genderCategories[0].slug : '',
       subCategory: '' 
     }));
   };
 
-  // Category Change: Resets SubCategory
   const handleCategoryChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -83,25 +77,32 @@ export default function CreateProduct() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
       
-      if (!file.type.startsWith('image/')) {
-        alert('Te rog selectează un fișier imagine');
-        return;
+      // Filter out non-images just in case
+      const validFiles = filesArray.filter(file => file.type.startsWith('image/'));
+      
+      if (validFiles.length !== filesArray.length) {
+        toast.error('Doar fișierele imagine sunt permise.');
       }
 
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      // Create preview URLs
+      const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+
+      // Append to existing arrays
+      setImageFiles(prev => [...prev, ...validFiles]);
+      setImagePreviews(prev => [...prev, ...newPreviews]);
     }
   };
 
-  const removeImage = () => {
-    setImageFile(null);
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-      setImagePreview(null);
-    }
+  const removeImage = (indexToRemove) => {
+    setImageFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+    setImagePreviews(prev => {
+      const newPreviews = prev.filter((_, index) => index !== indexToRemove);
+      URL.revokeObjectURL(prev[indexToRemove]); // Free up memory
+      return newPreviews;
+    });
   };
 
   // --- SUBMIT LOGIC ---
@@ -110,52 +111,52 @@ export default function CreateProduct() {
     setLoading(true);
     setError(null);
 
-
     try {
-      let finalImageUrl = null;
+      let uploadedUrls = [];
 
-      // STEP 1: Upload Image to Cloudflare
-      if (imageFile) {
-        // A. Get Presigned URL
-        const presignRes = await fetch(`${API_URL}/products/admin/upload-url`, {
-          method: 'POST',
-          credentials: "include", 
-          headers: { 
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ fileType: imageFile.type }),
+      // STEP 1: Upload Images to Cloudflare (Runs in parallel for speed)
+      if (imageFiles.length > 0) {
+        const uploadPromises = imageFiles.map(async (file) => {
+          // A. Get Presigned URL
+          const presignRes = await fetch(`${API_URL}/products/admin/upload-url`, {
+            method: 'POST',
+            credentials: "include", 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileType: file.type }),
+          });
+          
+          if (!presignRes.ok) throw new Error("Nu s-a putut genera URL-ul de încărcare");
+          const { uploadUrl, publicUrl } = await presignRes.json();
+
+          // B. Upload File directly to Cloudflare R2
+          const uploadRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file,
+            credentials: "omit"
+          });
+
+          if (!uploadRes.ok) throw new Error("Nu s-a putut încărca imaginea pe serverul de stocare");
+          
+          return publicUrl;
         });
-        
-        if (!presignRes.ok) throw new Error("Nu s-a putut genera URL-ul de încărcare");
-        
-        const { uploadUrl, publicUrl } = await presignRes.json();
 
-        // B. Upload File directly to Cloudflare R2
-        const uploadRes = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': imageFile.type 
-          },
-          body: imageFile,
-          credentials: "omit" // CRITICAL
-        });
-
-        if (!uploadRes.ok) throw new Error("Nu s-a putut încărca imaginea pe serverul de stocare");
-        
-        finalImageUrl = publicUrl;
+        // Wait for all uploads to finish and gather the URLs
+        uploadedUrls = await Promise.all(uploadPromises);
       }
 
       // STEP 2: Create Product in Database
       const productPayload = {
         ...formData,
-        price: Number(formData.price), // Backend handles the *100 multiplication
+        price: Number(formData.price),
         
-        // Ensure empty strings are sent as null for validation
         subCategory: formData.subCategory === "" ? null : formData.subCategory,
         description: formData.description === "" ? null : formData.description,
         material: formData.material === "" ? null : formData.material,
 
-        image: finalImageUrl,
+        // The first image in the array is the main one, and the array holds everything
+        image: uploadedUrls.length > 0 ? uploadedUrls[0] : null,
+        image_list: uploadedUrls, 
       };
 
       const productRes = await fetch(`${API_URL}/products/admin`, {
@@ -203,38 +204,51 @@ export default function CreateProduct() {
         
         {/* --- IMAGE UPLOAD SECTION --- */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Imagine Produs</label>
-          
-          {!imagePreview ? (
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition-colors duration-200">
-              <input 
-                type="file" 
-                id="image-upload" 
-                accept="image/*" 
-                className="hidden" 
-                onChange={handleFileChange} 
-              />
-              <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
-                <div className="bg-blue-50 p-4 rounded-full mb-3">
-                  <Upload className="h-8 w-8 text-blue-500" />
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Imagini Produs</label>
+          <p className="text-xs text-gray-500 mb-4">Prima imagine încărcată va fi setată automat ca imagine principală.</p>
+
+          {/* Image Previews Grid */}
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className={`relative w-full h-40 bg-gray-100 rounded-xl overflow-hidden border ${index === 0 ? 'border-blue-500 ring-2 ring-blue-300' : 'border-gray-200'} group`}>
+                  {index === 0 && (
+                    <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 z-10 rounded-br-lg shadow-sm">
+                      Principală
+                    </div>
+                  )}
+                  <img src={preview} alt={`Previzualizare ${index}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200" />
+                  <button 
+                    type="button" 
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md transition-transform hover:scale-110 z-10"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
-                <span className="text-base font-medium text-gray-700">Apasă pentru a încărca imaginea</span>
-                <span className="text-sm text-gray-400 mt-1">SVG, PNG, JPG sau WEBP</span>
-              </label>
-            </div>
-          ) : (
-            <div className="relative w-full h-80 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 group">
-              <img src={imagePreview} alt="Previzualizare" className="w-full h-full object-contain" />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200" />
-              <button 
-                type="button" 
-                onClick={removeImage}
-                className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg transition-transform hover:scale-110"
-              >
-                <X size={20} />
-              </button>
+              ))}
             </div>
           )}
+
+          {/* Upload Dropzone */}
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors duration-200">
+            <input 
+              type="file" 
+              id="image-upload" 
+              accept="image/*" 
+              multiple 
+              className="hidden" 
+              onChange={handleFileChange} 
+            />
+            <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
+              <div className="bg-blue-50 p-4 rounded-full mb-3">
+                <Upload className="h-8 w-8 text-blue-500" />
+              </div>
+              <span className="text-base font-medium text-gray-700">Apasă pentru a încărca imagini</span>
+              <span className="text-sm text-gray-400 mt-1">Poți selecta mai multe imagini simultan</span>
+            </label>
+          </div>
         </div>
 
         <div className="border-t border-gray-100 my-6"></div>
@@ -307,7 +321,6 @@ export default function CreateProduct() {
         {/* --- DYNAMIC SELECTS --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* 1. GENDER SELECT */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Gen</label>
             <select
@@ -321,7 +334,6 @@ export default function CreateProduct() {
             </select>
           </div>
 
-          {/* 2. CATEGORY SELECT (Dependent on Gender) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
             <select
@@ -330,19 +342,14 @@ export default function CreateProduct() {
               onChange={handleCategoryChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 bg-white focus:border-blue-500 focus:outline-none"
             >
-               {/* Default/Placeholder option if nothing is selected yet */}
                {!formData.category && <option value="" disabled>Selectează Categoria</option>}
-               
                {availableCategories.map((c) => {
-                if(c.slug==="noutati")
-                  return null
-                else
-                  return <option key={c.slug} value={c.slug}>{c.name}</option>
+                if(c.slug==="noutati") return null;
+                return <option key={c.slug} value={c.slug}>{c.name}</option>
               })}
             </select>
           </div>
 
-          {/* 3. SUB-CATEGORY SELECT (Dependent on Category) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Categorie</label>
             <select

@@ -20,16 +20,16 @@ export const navigationData: NavigationData = {
       name: 'Noutati',
       slug: 'noutati',
     },
-    {
-      name: 'Curvy Marimi Mari',
-      slug: 'curvy-marimi-mari',
-      subcategories: [
-        { name: 'Sutiene', slug: 'sutiene' },
-        { name: 'Body si Corset', slug: 'body-si-corset' },
-        { name: 'Chiloti', slug: 'chiloti' },
-        { name: 'Costume de Baie', slug: 'costume-de-baie' },
-      ],
-    },
+    // {
+    //   name: 'Curvy Marimi Mari',
+    //   slug: 'curvy-marimi-mari',
+    //   subcategories: [
+    //     { name: 'Sutiene', slug: 'sutiene' },
+    //     { name: 'Body si Corset', slug: 'body-si-corset' },
+    //     { name: 'Chiloti', slug: 'chiloti' },
+    //     { name: 'Costume de Baie', slug: 'costume-de-baie' },
+    //   ],
+    // },
     {
       name: 'Sutiene',
       slug: 'sutiene',

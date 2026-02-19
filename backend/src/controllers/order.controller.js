@@ -1,5 +1,5 @@
 import logger from "#config/logger.js";
-import { createOrder, fetchDetails, getOrdersByUserId, verifyStock } from "#services/order.service.js";
+import { createOrder, fetchDetails, fetchDetailsAdmin, getAllOrdersAdmin, getOrdersByUserId, updateOrderAdmin, verifyStock } from "#services/order.service.js";
 import { createPaymentSession } from "#services/payment.service.js";
 import { formatValidationError } from "#utils/format.js";
 import { createOrderSchema } from "#validations/order.validation.js";
@@ -200,8 +200,6 @@ export const getOrderDetails=async (req,res)=>{
         const userId=req.user.id
         const orderId=Number(req.params.id)
 
-        console.log(userId,orderId)
-
         const result=await fetchDetails(userId,orderId)
 
         res.status(200).json(result)
@@ -214,6 +212,72 @@ export const getOrderDetails=async (req,res)=>{
 
         return res.status(500).json({ 
             error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}
+
+
+//admin
+
+export const getAdminOrders=async (req,res)=>{
+    try {
+        const {page,limit,email,orderId}=req.query
+
+        const pageNum=parseInt(page) || 1
+        const limitNum=parseInt(limit) || 10
+
+        const result=await getAllOrdersAdmin(pageNum,limitNum,email,orderId)
+        
+        return res.status(200).json(result)
+    } catch (error) {
+        logger.error(`Error getting orders:`, error);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}
+
+export const getAdminOrder= async(req,res)=>{
+    try {
+        const orderId=Number(req.params.id)
+
+        const result=await fetchDetailsAdmin(orderId)
+
+        res.status(200).json(result)
+    } catch (error) {
+        logger.error(`Error getting order details:`, error);
+
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
+    }
+}
+
+export const updateAdminOrder = async (req, res) => {
+    try {
+        const orderId = Number(req.params.id);
+        const { status } = req.body;
+
+        const result = await updateOrderAdmin(orderId, status);
+
+        res.status(200).json({
+            message: "Order updated successfully",
+            result: result
+        });
+    } catch (error) {
+        logger.error(`Error updating order:`, error);
+
+        const statusCode = error.message.includes('invalid') || error.message.includes('găsită') ? 400 : 500;
+
+        return res.status(statusCode).json({ 
+            error: statusCode === 500 ? 'Internal server error' : 'Validation Error',
             message: error.message 
         });
     }

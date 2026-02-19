@@ -3,7 +3,7 @@ import logger from "#config/logger.js";
 import { product_variants } from "#models/product-variant.model.js";
 import { products } from "#models/product.model.js"
 import { count as countFn } from "drizzle-orm"
-import { eq, desc ,and, asc} from "drizzle-orm";
+import { eq, desc ,and, asc, ilike} from "drizzle-orm";
 
 export const retrieveAllProducts = async (
     page = 1, 
@@ -11,15 +11,24 @@ export const retrieveAllProducts = async (
     gender = "", 
     category = "", 
     subCategory = "", 
-    sortBy = "newest"
+    sortBy = "newest",
+    keyword = ""
 ) => {
     try {
         const offset = (page - 1) * limit;
 
         const filters = [];
+        
+        // Existing exact-match filters
         if (gender) filters.push(eq(products.gender, gender));
         if (category) filters.push(eq(products.category, category));
         if (subCategory) filters.push(eq(products.subCategory, subCategory));
+        
+        // --- NEW KEYWORD SEARCH FILTER ---
+        if (keyword) {
+            filters.push(ilike(products.name, `%${keyword}%`));
+        }
+
         const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
         let orderByClause;
@@ -139,7 +148,8 @@ export const insertProduct = async (productData) => {
             material: productData.material || null,
             price: productData.price,
             bigSizes: productData.bigSizes ?? false,
-            cod:productData.cod
+            cod:productData.cod,
+            image_list:productData.image_list   
         }).returning();
 
         return created;

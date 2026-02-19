@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search,LockKeyhole, ShoppingBag, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGender } from '@/context/GenderContext';
@@ -15,6 +15,8 @@ import { useCartStore } from '@/hooks/use-cartstore';
 
 const Navbar = () => {
   const { gender, setGender } = useGender();
+
+  const navigate=useNavigate()
   
   // 2. Extragem coșul din Zustand și calculăm totalul de produse
   const cart = useCartStore((state) => state.cart);
@@ -30,6 +32,7 @@ const Navbar = () => {
   const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
   const user=useAuthStore((state)=>state.user)
 
+  const [search,setSearch]=useState<string|null>(null)
 
   const handleCategoryHover = (slug: string | null) => {
     setActiveCategory(slug);
@@ -37,6 +40,25 @@ const Navbar = () => {
 
   const toggleMobileCategory = (slug: string) => {
     setExpandedMobileCategory(expandedMobileCategory === slug ? null : slug);
+  };
+
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      
+      if (search && search.trim() !== '') {
+        // Navigate to the homepage with the search keyword in the URL
+        navigate(`/${gender}/cauta/?keyword=${encodeURIComponent(search.trim())}`);
+      } else {
+        // If the search bar is empty and they hit enter, just go home
+        navigate("/");
+      }
+      
+      // Optional: Close the search bar after searching
+      setIsSearchOpen(false); 
+      setSearch(''); // Clear the input
+    }
   };
 
   return (
@@ -207,7 +229,10 @@ const Navbar = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                 <input
                   type="text"
-                  placeholder="Search for products..."
+                  placeholder="Căutați produse..."
+                  onChange={(e) => setSearch(e.target.value)}
+                  value={search || ''} 
+                  onKeyDown={handleSearch}
                   className="w-full border-b border-border bg-transparent py-3 pl-12 pr-4 text-sm focus:border-foreground focus:outline-none"
                   autoFocus
                 />

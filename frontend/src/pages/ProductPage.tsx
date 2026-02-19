@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronRight, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Importuri Zustand
-import  useAuthStore from '@/hooks/use-authstore'; // Asigură-te că calea e corectă
-import { useCartStore, CartItem } from '@/hooks/use-cartstore'; // Noul store creat mai sus
+import useAuthStore from '@/hooks/use-authstore'; 
+import { useCartStore, CartItem } from '@/hooks/use-cartstore';
 
 // Import your base interface
 import { Product } from '@/data/products';
@@ -30,10 +30,9 @@ const ProductPage = () => {
   const { isAuthenticated } = useAuthStore();
   const { addItem } = useCartStore();
 
-  // State typed strictly with Product
+  // State
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<Variants[] | null>([]);
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -42,6 +41,9 @@ const ProductPage = () => {
   const [selectedVariantId, setSelectedVariantId] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [available, setAvailable] = useState(0);
+  
+  // Image Gallery State
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // 1. Fetch Product Data
   useEffect(() => {
@@ -66,12 +68,9 @@ const ProductPage = () => {
         setProduct(productData);
         setVariants(variantsData);
         
-        // Reset selections
         setSelectedSize('');
         setQuantity(1);
-
-        // Fetch Related Products logic here if needed...
-
+        setCurrentImageIndex(0); 
       } catch (err) {
         console.error("Error loading product:", err);
         setError(true);
@@ -87,23 +86,19 @@ const ProductPage = () => {
   }, [id]);
 
   const handleAddToCart = async () => {
-    // 1. Validări
     if (variants && variants.length > 0 && !selectedSize) {
       toast.error('Te rugăm să alegi o mărime');
       return;
     }
-
     if (!available || available === 0) {
       toast.error('Acest produs nu este în stoc');
       return;
     }
-
     if (quantity > available) {
       toast.error(`Stoc insuficient. Mai sunt doar ${available} bucăți.`);
       return;
     }
 
-    // Construim obiectul produsului pentru coș
     const cartItemToAdd: CartItem = {
       ...product,
       variantId: selectedVariantId,
@@ -111,9 +106,7 @@ const ProductPage = () => {
       quantity: quantity,
     };
 
-    // 2. Logica bifurcată: Auth vs Guest
     if (isAuthenticated) {
-      // --- LOGICA PENTRU USERI LOGAȚI (API) ---
       try {
         const response = await fetch("http://localhost:3000/api/cart", {
           method: "POST",
@@ -128,23 +121,16 @@ const ProductPage = () => {
 
         const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.message || "Eșec la adăugarea produsului în coș");
-        }
+        if (!response.ok) throw new Error(data.message || "Eșec la adăugarea produsului în coș");
 
-        // Succes API -> Adăugăm și în Zustand pentru update instant la UI (ex: numărul din iconița de coș)
         addItem(cartItemToAdd);
         toast.success(`${product?.name} a fost adăugat în coș!`);
 
       } catch (error: any) {
-        console.error("Cart Error:", error);
         toast.error(error.message || "A apărut o problemă. Încearcă din nou.");
       }
-
     } else {
-      // --- LOGICA PENTRU USERI NELOGAȚI (LocalStorage via Zustand) ---
       try {
-        // Funcția addItem din Zustand se ocupă de salvarea în localStorage datorită middleware-ului 'persist'
         addItem(cartItemToAdd);
         toast.success(`${product?.name} a fost adăugat în coș (Local)!`);
       } catch (error) {
@@ -153,7 +139,15 @@ const ProductPage = () => {
     }
   };
 
-  // Loading & Error States
+  const images = product?.image_list?.length > 0 
+    ? product.image_list 
+    : product?.image 
+      ? [product.image] 
+      : [];
+
+  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -188,7 +182,6 @@ const ProductPage = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 text-sm text-muted-foreground">
             <li><Link to="/" className="hover:text-foreground">Acasă</Link></li>
@@ -203,20 +196,68 @@ const ProductPage = () => {
           </ol>
         </nav>
 
-        <div className="grid gap-12 lg:grid-cols-2">
-          {/* Image Gallery */}
-          <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="aspect-[3/4] overflow-hidden bg-secondary rounded-sm"
-            >
-              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-            </motion.div>
+        {/* --- CHANGED GRID LAYOUT HERE --- */}
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-12">
+          
+          {/* --- IMAGE GALLERY (Now takes 5 columns instead of 6, and has a max width) --- */}
+          <div className="space-y-4 select-none lg:col-span-5 lg:max-w-md w-full">
+            <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-xl group flex items-center justify-center">
+              {images.length > 0 ? (
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentImageIndex}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    src={images[currentImageIndex]}
+                    alt={`${product.name} - imaginea ${currentImageIndex + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </AnimatePresence>
+              ) : (
+                 <div className="text-muted-foreground">Fără imagine</div>
+              )}
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 transform hover:scale-110"
+                  >
+                    <ChevronLeft size={24} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 transform hover:scale-110"
+                  >
+                    <ChevronRight size={24} strokeWidth={2.5} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {images.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    className={`relative h-20 w-16 sm:h-24 sm:w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 ease-in-out ${
+                      currentImageIndex === idx 
+                        ? 'border-foreground shadow-md' 
+                        : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Product Details */}
-          <div className="space-y-8">
+          {/* --- PRODUCT DETAILS (Now takes 7 columns instead of 6) --- */}
+          <div className="space-y-8 lg:col-span-6">
             <div>
               <h1 className="font-heading text-3xl lg:text-4xl font-semibold">{product.name}</h1>
               <div className="mt-6 flex items-center gap-4">
@@ -229,17 +270,14 @@ const ProductPage = () => {
               </div>
             </div>
 
-            <p className="text-muted-foreground leading-relaxed text-lg">
+            <p className="text-muted-foreground leading-relaxed text-lg max-w-2xl">
               {product.description || "Nu există descriere disponibilă."}
             </p>
 
-            {/* Size Selection */}
             {variants && variants.length > 0 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-md">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold uppercase tracking-wider">Alege Mărimea</h3>
-                  {/* Poți adăuga link către ghidul de mărimi dacă există */}
-                  {/* <button className="text-sm text-muted-foreground underline">Ghid Mărimi</button> */}
                 </div>
                 
                 <div className="flex flex-wrap gap-3">
@@ -255,7 +293,7 @@ const ProductPage = () => {
                             setSelectedSize(vari.size);
                             setAvailable(vari.quantity);
                             setSelectedVariantId(vari.id);
-                            setQuantity(1); // Reset quantity on size change
+                            setQuantity(1); 
                           }
                         }}
                         disabled={isOutOfStock}
@@ -274,7 +312,6 @@ const ProductPage = () => {
                   })}
                 </div>
 
-                {/* Stock info message */}
                 {selectedSize && (
                   <div className="text-sm font-medium animate-in fade-in slide-in-from-top-1">
                      {available >= 5 
@@ -286,8 +323,7 @@ const ProductPage = () => {
               </div>
             )}
 
-            {/* Quantity & Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border max-w-md">
               <div className="flex items-center border border-border rounded-md w-max">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -314,7 +350,6 @@ const ProductPage = () => {
               </Button>
             </div>
             
-            {/* Additional Details (Material, Care, etc.) - Optional Placeholder */}
             {product.material && (
                 <div className="space-y-4 pt-6 text-sm text-muted-foreground">
                     <p><span className="font-semibold text-foreground">Material:</span> {product.material}</p>

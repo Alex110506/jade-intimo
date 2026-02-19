@@ -18,7 +18,7 @@ const Bestsellers = ({ products }) => {
       : products.filter((p) => p.gender === gender).slice(0, 4);
 
   return (
-    <section className="section-padding bg-background">
+    <section className="p-12 bg-background">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

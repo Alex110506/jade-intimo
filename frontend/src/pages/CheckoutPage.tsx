@@ -28,8 +28,8 @@ const CheckoutPage = () => {
   // Notă: Verifică dacă prețurile sunt în bani (cents/bani) sau unități întregi. 
   // Aici am presupus că pragul de gratuitate este 100 RON și transportul 15 RON (ajustat pentru RO),
   // dar am păstrat logica ta originală de calcul.
-  const shippingCost = cartTotal > 10000 ? 0 : 1500; // Exemplu: 15.00 RON transport dacă sub 100 RON
-  const finalTotal = cartTotal + shippingCost;
+  const shippingCost = cartTotal > 10000 ? 0 : 1000; // Exemplu: 15.00 RON transport dacă sub 100 RON
+  const finalTotal = cartTotal;
 
   // Transform cart items to match backend snake_case expectation
   const cartItems = cart.map((item) => ({
@@ -555,7 +555,7 @@ const CheckoutPage = () => {
                   <hr className="border-border" />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
-                    <span>{(finalTotal/100).toFixed(2)} RON</span>
+                    <span>{((finalTotal+shippingCost)/100).toFixed(2)} RON</span>
                   </div>
                 </div>
               </div>
