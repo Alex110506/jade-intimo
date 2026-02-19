@@ -3508,3 +3508,9 @@
 {"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
 {"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
 {"level":"info","message":"::1 - - [19/Feb/2026:21:25:51 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest HTTP/1.1\" 200 2606 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [19/Feb/2026:21:44:24 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [19/Feb/2026:21:44:25 +0000] \"GET /api/auth/getAddress HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [19/Feb/2026:21:44:25 +0000] \"GET /api/cart HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36\"","service":"user-service"}
