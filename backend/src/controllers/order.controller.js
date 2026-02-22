@@ -1,5 +1,5 @@
 import logger from "#config/logger.js";
-import { createOrder, fetchDetails, fetchDetailsAdmin, getAllOrdersAdmin, getOrdersByUserId, updateOrderAdmin, verifyStock } from "#services/order.service.js";
+import { createOrder, fetchDetails, fetchDetailsAdmin, getAllOrdersAdmin,fetchDetailsWithId, getOrdersByUserId, updateOrderAdmin, verifyStock } from "#services/order.service.js";
 import { createPaymentSession } from "#services/payment.service.js";
 import { formatValidationError } from "#utils/format.js";
 import { createOrderSchema } from "#validations/order.validation.js";
@@ -8,6 +8,9 @@ import { orders } from "#models/order.model.js";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
+import { orderPlaced } from "#utils/emails/orderPlaced.js";
+import { sendEmail } from "#services/email.service.js";
+import { orderShipped } from "#utils/emails/orderShipping.js";
 
 const stripe = new Stripe(process.env.STRIPE_API_KEY);
 
@@ -106,9 +109,40 @@ export const placeOrderController = async (req, res) => {
             });
         }
 
+        let shipping_cost = 0;
+        if (orderData.total_ammount < 10000)
+            shipping_cost = 1000;
+
+        const orderDetails=await fetchDetailsWithId(insertResult.orderId)
+        console.log(orderDetails)
+        const items=orderDetails.items
+
+        const fullName=orderData.first_name+" "+orderData.last_name
+        sendEmail({
+            to:orderData.email,
+            subject:"Comandă plasat cu Succes!",
+            text:"Comandă plasat cu Succes!",
+            html:orderPlaced(
+                orderData.email,
+                orderData.phone,
+                orderData.first_name,
+                orderData.last_name,
+                fullName,
+                orderData.address_line,
+                orderData.city,
+                orderData.state,
+                orderData.postal_code,
+                orderData.country,
+                orderData.total_ammount,
+                shipping_cost,
+                items,
+                orderData.payment_method
+            )
+        })
+        
+
         logger.info(`Order with id ${insertResult.orderId} placed successfully`);
 
-        // TODO: Email Service Trigger Here (Order Confirmation)
 
         return res.status(201).json({
             message: "Order placed successfully",
@@ -123,6 +157,10 @@ export const placeOrderController = async (req, res) => {
                 error: "Inventory Error",
                 message: error.message 
             });
+        }
+
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: "Order not found" });
         }
 
         return res.status(500).json({ 
@@ -266,6 +304,13 @@ export const updateAdminOrder = async (req, res) => {
         const { status } = req.body;
 
         const result = await updateOrderAdmin(orderId, status);
+
+        sendEmail({
+            to:result.email,
+            subject:"Comanda este în curs de livrare",
+            text:"Comanda ta a fost procesată și este în drum spre tine!",
+            html:orderShipped(result.first_name,result.last_name,result.id)
+        })
 
         res.status(200).json({
             message: "Order updated successfully",

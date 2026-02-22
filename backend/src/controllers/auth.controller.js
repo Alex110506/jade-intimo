@@ -20,6 +20,8 @@ import { cookies } from '#utils/cookies.js';
 import { db } from '#config/database.js';
 import { addresses } from '#models/adress.model.js';
 import { eq } from 'drizzle-orm';
+import { sendEmail } from '#services/email.service.js';
+import { welcomeEmail } from '#utils/emails/welcome.js';
 
 export const signupController = async (req, res) => {
   try {
@@ -54,6 +56,9 @@ export const signupController = async (req, res) => {
     });
 
     cookies.set(res, 'token', token);
+
+    const fullName=user.first_name+" "+user.last_name;
+    sendEmail({to:user.email,subject:"Bine ai venit in cont",text:"Bine ai venit in cont!",html:welcomeEmail(user.email,fullName,user.phone,user.first_name,user.last_name)})
 
     logger.info('user registered successfully:', email);
     res.status(201).json({

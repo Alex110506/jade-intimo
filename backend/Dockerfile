@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-slim AS base
 
 WORKDIR /app
 
@@ -8,8 +8,10 @@ RUN npm ci --only=production && npm cache clean --force
 
 COPY . .
 
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# --- AICI ESTE MODIFICAREA PENTRU DEBIAN ---
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 --ingroup nodejs nodejs
+# -------------------------------------------
 
 RUN chown -R nodejs:nodejs /app
 USER nodejs

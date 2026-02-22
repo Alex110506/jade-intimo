@@ -39,9 +39,7 @@ export const retrieveAllProducts = async (
             case "price-high-low":
                 orderByClause = desc(products.price);
                 break;
-            case "best-selling":
-                orderByClause = desc(products.soldPieces);
-                break;
+            
             case "newest":
             default:
                 orderByClause = desc(products.created_at);

@@ -29,6 +29,7 @@ const createOrder = async ({
             if (total_ammount < 10000)
                 shipping_cost = 1000;
 
+            // 1. Insert Order
             const [newOrder] = await tx
                 .insert(orders)
                 .values({
@@ -52,6 +53,7 @@ const createOrder = async ({
                 throw new Error("Failed to create order");
             }
 
+            // 2. Insert Order Items
             const orderItemsData = items.map((item) => ({
                 order_id: newOrder.id,
                 variant_id: item.variant_id,
@@ -62,12 +64,13 @@ const createOrder = async ({
             if (orderItemsData.length > 0) {
                 await tx.insert(orderItems).values(orderItemsData);
                 
+                // --- 3. Update Inventory & Sales Metrics ---
                 const variantIds = items.map(item => item.variant_id);
 
                 const variantRecords = await tx
                     .select({ 
                         id: product_variants.id, 
-                        product_id: product_variants.product_id // presupunem că așa se numește coloana
+                        product_id: product_variants.product_id 
                     })
                     .from(product_variants)
                     .where(inArray(product_variants.id, variantIds));
@@ -77,19 +80,38 @@ const createOrder = async ({
                     variantToProductMap[v.id] = v.product_id;
                 });
 
+                // Execute updates for both Products (sales) and Variants (stock) in parallel
                 await Promise.all(items.map((item) => {
                     const productId = variantToProductMap[item.variant_id];
+                    const updates = [];
 
-                    if (productId) {
-                        return tx.update(products)
-                            .set({ 
-                                soldPieces: sql`${products.soldPieces} + ${item.quantity}` 
+                    // A. DECREASE VARIANT STOCK
+                    // Make sure to change 'stock' if your column is named differently (e.g., 'quantity')
+                    updates.push(
+                        tx.update(product_variants)
+                            .set({
+                                quantity: sql`${product_variants.quantity} - ${item.quantity}` 
                             })
-                            .where(eq(products.id, productId));
+                            .where(eq(product_variants.id, item.variant_id))
+                    );
+
+                    // B. INCREASE PRODUCT SOLD PIECES
+                    if (productId) {
+                        updates.push(
+                            tx.update(products)
+                                .set({ 
+                                    soldPieces: sql`${products.soldPieces} + ${item.quantity}` 
+                                })
+                                .where(eq(products.id, productId))
+                        );
                     }
+
+                    // Run both updates for this item
+                    return Promise.all(updates);
                 }));
             }
 
+            // 4. Clear Cart
             if (user_id) {
                 const [userCart] = await tx
                     .select()
@@ -172,6 +194,44 @@ const fetchDetails = async (userId, orderId) => {
                     eq(orders.id, orderId),
                     eq(orders.user_id, userId)
                 )                
+            );
+
+        if (!order) {
+            throw new Error("Order not found or access denied.");
+        }
+
+        const orderProds = await db
+            .select({
+                id: orderItems.id,
+                quantity: orderItems.quantity,
+                price: orderItems.price_at_purchase,
+                size: product_variants.size,
+                productName: products.name,
+                image: products.image
+            })
+            .from(orderItems)
+            .leftJoin(product_variants, eq(orderItems.variant_id, product_variants.id))
+            .leftJoin(products, eq(product_variants.product_id, products.id))
+            .where(eq(orderItems.order_id, orderId));
+
+        return {
+            ...order,
+            items: orderProds
+        };
+
+    } catch (error) {
+        logger.error(`FetchDetails Error: ${error.message}`);
+        throw error;
+    }
+}
+
+const fetchDetailsWithId=async(orderId)=>{
+    try {
+        const [order] = await db
+            .select()
+            .from(orders)
+            .where(
+                eq(orders.id, orderId),
             );
 
         if (!order) {
@@ -314,4 +374,4 @@ const updateOrderAdmin = async (orderId, status) => {
     }
 }
 
-export { createOrder,getOrdersByUserId,verifyStock,fetchDetails,getAllOrdersAdmin,fetchDetailsAdmin,updateOrderAdmin};
+export { createOrder,getOrdersByUserId,verifyStock,fetchDetails,getAllOrdersAdmin,fetchDetailsAdmin,updateOrderAdmin,fetchDetailsWithId};

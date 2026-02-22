@@ -6,7 +6,7 @@ services:
     ports:
       - '5432:5432'
     env_file:
-      - .env.development
+      - .env
     volumes:
       - ./.neon_local/:/tmp/.neon_local
       - ./.git/HEAD:/tmp/.git/HEAD:ro,consistent
@@ -29,7 +29,7 @@ services:
     ports:
       - '${PORT:-3000}:3000'
     env_file:
-      - .env.development
+      - .env
     environment:
       - DATABASE_URL=postgres://neon:neon@neon-local:5432/neondb
     volumes:

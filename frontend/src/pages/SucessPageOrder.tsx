@@ -52,7 +52,6 @@ const SuccessPage = () => {
       }
     };
 
-    // Run once on mount
     finalizeOrder();
   }, [sessionId]);
 
@@ -63,9 +62,15 @@ const SuccessPage = () => {
   );
   
   if (status === 'error') return (
-    <div className="flex min-h-screen items-center justify-center text-red-600">
-      <p>Ceva nu a mers bine. Te rugăm să contactezi suportul.</p>
-    </div>
+    <>
+    <Navbar/>
+      <div className="flex min-h-screen items-center justify-center text-red-600">
+        <p>Ceva nu a mers bine. Te rugăm să mai verifici odată datele introduse! </p>
+        
+        <p>Te rugăm să contactezi suportul.</p>
+      </div>
+      <Footer/>
+    </>
   );
 
   return (

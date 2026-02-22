@@ -25,10 +25,7 @@ const CheckoutPage = () => {
   const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  // Notă: Verifică dacă prețurile sunt în bani (cents/bani) sau unități întregi. 
-  // Aici am presupus că pragul de gratuitate este 100 RON și transportul 15 RON (ajustat pentru RO),
-  // dar am păstrat logica ta originală de calcul.
-  const shippingCost = cartTotal > 10000 ? 0 : 1000; // Exemplu: 15.00 RON transport dacă sub 100 RON
+  const shippingCost = cartTotal > 10000 ? 0 : 1000; 
   const finalTotal = cartTotal;
 
   // Transform cart items to match backend snake_case expectation
@@ -38,16 +35,17 @@ const CheckoutPage = () => {
     price: item.price
   }));
 
+  // FIXED: Added optional chaining (?.) to safely handle null user or address
   const [shippingInfo, setShippingInfo] = useState({
-    firstName: isAuthenticated ? user.first_name : '',
-    lastName: isAuthenticated ? user.last_name : '',
-    email: isAuthenticated ? user.email : '',
-    phone: isAuthenticated ? user.phone : '',
-    address: isAuthenticated ? address.address_line : '',
-    city: isAuthenticated ? address.city : '',
-    state: isAuthenticated ? address.state : '',
-    zipCode: isAuthenticated ? address.postal_code : '',
-    country: isAuthenticated ? address.country : 'Romania',
+    firstName: isAuthenticated ? (user?.first_name || '') : '',
+    lastName: isAuthenticated ? (user?.last_name || '') : '',
+    email: isAuthenticated ? (user?.email || '') : '',
+    phone: isAuthenticated ? (user?.phone || '') : '',
+    address: isAuthenticated ? (address?.address_line || '') : '',
+    city: isAuthenticated ? (address?.city || '') : '',
+    state: isAuthenticated ? (address?.state || '') : '',
+    zipCode: isAuthenticated ? (address?.postal_code || '') : '',
+    country: isAuthenticated ? (address?.country || "Romania") : 'Romania',
   });
 
   const steps: { key: Step; label: string; icon: React.ElementType }[] = [
@@ -66,7 +64,6 @@ const CheckoutPage = () => {
     setCurrentStep('review');
   };
 
-  // --- NEW WORKFLOW IMPLEMENTATION ---
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
 
@@ -85,10 +82,8 @@ const CheckoutPage = () => {
         items: cartItems,
       };
 
-      // --- WORKFLOW 1: CREDIT CARD ---
       if (paymentMethod === 'credit_card') {
         
-        // 1. Check Stock
         const stockRes = await fetch("http://localhost:3000/api/order/check_stock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,7 +95,6 @@ const CheckoutPage = () => {
           throw new Error(errorData.error || "Unele produse nu mai sunt în stoc");
         }
 
-        // 2. Get Stripe URL
         const paymentRes = await fetch("http://localhost:3000/api/order/payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -108,19 +102,14 @@ const CheckoutPage = () => {
         });
         const paymentData = await paymentRes.json();
         
-        // 3. SAVE DATA TO LOCAL STORAGE (Critical Step!)
-        // We need this data to persist across the redirect
         localStorage.setItem('pending_order_data', JSON.stringify(orderPayload));
 
-        // 4. Redirect
         if (paymentData.url) {
             window.location.href = paymentData.url;
         }
 
       } 
-      // --- WORKFLOW 2: CASH ON DELIVERY ---
       else {
-        // Direct placement for COD (as requested)
         const res = await fetch("http://localhost:3000/api/order/place", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

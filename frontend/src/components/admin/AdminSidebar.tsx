@@ -36,7 +36,7 @@ const adminNavigation = [
     ],
   },
   {
-    name: 'Comenyi',
+    name: 'Comenzi',
     icon: ShoppingCart,
     children: [
       { name: 'Toate Comenzile', href: '/admin/orders', icon: List },
