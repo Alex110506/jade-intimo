@@ -42,16 +42,6 @@ const adminNavigation = [
       { name: 'Toate Comenzile', href: '/admin/orders', icon: List },
     ],
   },
-  {
-    name: 'Clienți',
-    href: '/admin/customers',
-    icon: Users,
-  },
-  {
-    name: 'Setări',
-    href: '/admin/settings',
-    icon: Settings,
-  },
 ];
 
 const AdminSidebar = () => {

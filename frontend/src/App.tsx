@@ -31,6 +31,10 @@ import EditVariantPage from "./pages/admin/EditVariantPage.tsx";
 import OrderListAdmin from "./pages/admin/OrderListAdmin.tsx";
 import OrderDetailsAdmin from "./pages/admin/OrderDetailsAdmin.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
+import Faq from "./pages/footerPages/Faq.tsx";
+import Asistenta from "./pages/footerPages/Asistenta.tsx";
+import LivrareRetur from "./pages/footerPages/LivrareRetur.tsx";
+import TermeniConditii from "./pages/footerPages/TermeniConditii.tsx";
 
 const queryClient = new QueryClient();
 
@@ -186,6 +190,11 @@ const App = () => {
                   
                 </Route>
 
+                <Route path="faq" element={<Faq/>}/>
+                <Route path="asistenta" element={<Asistenta/>}/>
+                <Route path="livrare_si_retur" element={<LivrareRetur/>}/>
+                <Route path="termeni_si_conditii" element={<TermeniConditii/>}/>
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

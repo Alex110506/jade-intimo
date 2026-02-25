@@ -9,6 +9,7 @@ import authRoutes from '#routes/auth.routes.js';
 import productRoutes from "#routes/product.routes.js"
 import cartRoutes from "#routes/cart.routes.js"
 import orderRoutes from "#routes/order.routes.js"
+import adminRoutes from "#routes/dashboard.routes.js"
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use("/api/products", productRoutes)
 app.use("/api/cart",cartRoutes)
 app.use("/api/order",orderRoutes)
+app.use("/api/admin",adminRoutes)
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

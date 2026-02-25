@@ -37,6 +37,7 @@ export const placeOrderController = async (req, res) => {
         if (!result.success) {
             return res.status(400).json({
                 error: "Order Validation Failed",
+                message: 'Validarea comenzii a eșuat',
                 details: formatValidationError(result.error)
             });
         }
@@ -105,7 +106,8 @@ export const placeOrderController = async (req, res) => {
         if (!insertResult) {
             logger.error("Insert returned no order");
             return res.status(500).json({
-                error: "Could not place order"
+                error: "Could not place order",
+                message: 'Eroare la plasarea comenzii'
             });
         }
 
@@ -160,7 +162,7 @@ export const placeOrderController = async (req, res) => {
         }
 
         if (error.message.includes("not found")) {
-            return res.status(404).json({ error: "Order not found" });
+            return res.status(404).json({ error: "Order not found", message: 'Comanda nu a fost găsită' });
         }
 
         return res.status(500).json({ 
@@ -200,7 +202,7 @@ export const payOrder = async (req, res) => {
         const { items } = req.body;
 
         if (!items || items.length === 0) {
-            return res.status(400).json({ error: "No items provided" });
+            return res.status(400).json({ error: "No items provided", message: 'Nu au fost furnizate produse' });
         }
 
         const paymentUrl = await createPaymentSession({ items });
@@ -211,6 +213,7 @@ export const payOrder = async (req, res) => {
         logger.error("Payment Controller Error:", error);
         return res.status(500).json({ 
             error: "Failed to initialize payment",
+            message: 'Eroare la inițierea plății',
             details: error.message 
         });
     }
@@ -245,7 +248,7 @@ export const getOrderDetails=async (req,res)=>{
         logger.error(`Error getting order details:`, error);
 
         if (error.message.includes("not found")) {
-            return res.status(404).json({ error: "Order not found" });
+            return res.status(404).json({ error: "Order not found", message: 'Comanda nu a fost găsită' });
         }
 
         return res.status(500).json({ 
@@ -288,7 +291,7 @@ export const getAdminOrder= async(req,res)=>{
         logger.error(`Error getting order details:`, error);
 
         if (error.message.includes("not found")) {
-            return res.status(404).json({ error: "Order not found" });
+            return res.status(404).json({ error: "Order not found", message: 'Comanda nu a fost găsită' });
         }
 
         return res.status(500).json({ 

@@ -10,87 +10,77 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <h2 className="font-heading text-2xl font-semibold tracking-wide">Jade Intimo</h2>
             <p className="mt-4 text-sm text-muted-foreground">
-              Premium intimates and loungewear crafted with the finest materials for the modern woman and man.
+              Lenjerie intimă și îmbrăcăminte premium, confecționate din cele mai fine materiale pentru femeia și bărbatul modern.
             </p>
             <div className="mt-6 flex gap-4">
-              <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+              <a href="https://www.instagram.com/jade_intimo_arad/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+              <a href="https://www.facebook.com/p/Jade-Intimo-Unirii-100063519762954/?locale=ro_RO" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
                 <Facebook size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
-                <Twitter size={20} />
               </a>
             </div>
           </div>
 
           {/* Help */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Help</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Asistență</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Customer Service
-                </a>
+                <Link to="/asistenta" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Asistență Clienți
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Size Guide
-                </a>
+                <Link to="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Ghid Mărimi
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Shipping & Returns
-                </a>
+                <Link to="/livrare_si_retur" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Livrare și Retur
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  Track Order
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  FAQ
-                </a>
+                <Link to="/faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Întrebări Frecvente
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Stay Connected</h3>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Subscribe for exclusive offers and new arrivals.
-            </p>
-            <div className="mt-4 flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 border-b border-border bg-transparent py-2 text-sm focus:border-foreground focus:outline-none"
-              />
-              <button className="ml-2 p-2 text-foreground transition-opacity hover:opacity-70">
-                <Mail size={20} />
-              </button>
+          {/* ANPC / Soluționare Litigii */}
+          <div className="flex justify-start md:justify-end lg:justify-end">
+            <div className="lig-cont-foot flex flex-col gap-3">
+              <a href="https://consumer-redress.ec.europa.eu/index_ro" target="_blank" rel="noopener noreferrer" className="link-lig-foot">
+                <img 
+                  alt="solutionare litigii" 
+                  src={`${import.meta.env.VITE_CLOUDFLARE_DOMAIN}/anpc-sol.webp`}
+                  className="w-40 h-auto"
+                />
+              </a>
+              <a href="https://reclamatiisal.anpc.ro/" target="_blank" rel="noopener noreferrer" className="link-lig-foot">
+                <img 
+                  alt="solutionare litigii anpc" 
+                  src={`${import.meta.env.VITE_CLOUDFLARE_DOMAIN}/anpc-sal.webp`}
+                  className="w-40 h-auto"
+                />
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-border pt-8">
+        <div className="mt-8 border-t border-border pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-xs text-muted-foreground">
-              © 2024 Jade Intimo. All rights reserved.
+            <p className="text-xs text-muted-foreground text-center md:text-left">
+              © 2026 Jade Intimo. Toate drepturile rezervate.
+              <br />
+              Site realizat de <a className="underline hover:text-foreground transition-colors" href="https://www.linkedin.com/in/alexandru-r%C4%83dulescu-12b115264/" target="_blank" rel="noopener noreferrer">Rădulescu Alexandru Marius</a>
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-                Terms of Service
-              </a>
-              <a href="#" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-                Cookie Policy
-              </a>
+              <Link to="/termeni_si_conditii" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
+                Termeni și Condiții
+              </Link>
             </div>
           </div>
         </div>

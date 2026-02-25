@@ -30,6 +30,7 @@ export const signupController = async (req, res) => {
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Inregistrare esuata',
+        message: 'Înregistrare eșuată',
         details: formatValidationError(validationResult.error),
       });
     }
@@ -74,7 +75,7 @@ export const signupController = async (req, res) => {
     });
   } catch (error) {
     logger.error('Signup error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };
 
@@ -85,6 +86,7 @@ export const loginController = async (req, res) => {
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Logare esuata',
+        message: 'Autentificare eșuată',
         details: formatValidationError(validationResult.error),
       });
     }
@@ -93,11 +95,11 @@ export const loginController = async (req, res) => {
 
     const user = await findUserByEmail(email);
 
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials', message: 'Date de autentificare invalide' });
 
     const isValid = await verifyPassword(password, user.password);
 
-    if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!isValid) return res.status(401).json({ error: 'Invalid credentials', message: 'Date de autentificare invalide' });
 
     const token = jwttoken.sign({
       id: user.id,
@@ -124,7 +126,7 @@ export const loginController = async (req, res) => {
     });
   } catch (error) {
     logger.error('Login error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };
 
@@ -135,7 +137,7 @@ export const logoutController = (req, res) => {
     return res.status(200).json({ message: 'logged out' });
   } catch (error) {
     logger.error('Logout error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };
 
@@ -148,6 +150,7 @@ export const updateDataController = async (req, res) => {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Validation failed',
+        message: 'Validare eșuată',
         details: formatValidationError(validation.error),
       });
     }
@@ -158,7 +161,7 @@ export const updateDataController = async (req, res) => {
     return res.status(200).json({ message: 'user updated', user: updated });
   } catch (error) {
     logger.error('Update error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };
 
@@ -169,6 +172,7 @@ export const addAddressController = async (req,res)=>{
     if(!validationResult.success){
       return res.status(400).json({
         error: 'Adaugarea Adresei esuata',
+        message: 'Adăugarea adresei a eșuat',
         details: formatValidationError(validationResult.error),
       });
     }
@@ -205,7 +209,7 @@ export const addAddressController = async (req,res)=>{
   }
   catch (error) {
     logger.error('address create error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 }
 
@@ -216,6 +220,7 @@ export const updateAddressController=async (req,res)=>{
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Actualizarea adresei esuata',
+        message: 'Actualizarea adresei a eșuat',
         details: formatValidationError(validationResult.error),
       });
     }
@@ -230,7 +235,7 @@ export const updateAddressController=async (req,res)=>{
     const address = await updatAdress(user_id, data);
 
     if (!address) {
-      return res.status(404).json({ error: 'Address not found' });
+      return res.status(404).json({ error: 'Address not found', message: 'Adresa nu a fost găsită' });
     }
 
     return res.status(200).json({
@@ -247,7 +252,7 @@ export const updateAddressController=async (req,res)=>{
     });
   } catch (error) {
     logger.error('address update error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };
 
@@ -256,7 +261,7 @@ export const getAddressController = async (req, res) => {
     const user_id = req.user && req.user.id;
 
     if (!user_id) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized', message: 'Acces neautorizat' });
     }
 
     const result = await db
@@ -285,6 +290,6 @@ export const getAddressController = async (req, res) => {
     });
   } catch (error) {
     logger.error('get address error', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
   }
 };

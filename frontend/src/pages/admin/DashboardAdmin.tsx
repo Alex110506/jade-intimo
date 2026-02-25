@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, 
   ShoppingBag, 
@@ -6,8 +6,7 @@ import {
   Clock, 
   ChevronRight, 
   AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight
+  Loader2
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -18,84 +17,155 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
+import { toast } from 'sonner';
 
-// --- MOCK DATA PENTRU DIVERSE PERIOADE ---
+// --- HELPER FUNCTION: PAD AND GROUP DATA ---
+const formatChartData = (rawData, rangeStr) => {
+  const days = parseInt(rangeStr, 10);
+  const interval = days === 30 ? 5 : days === 90 ? 15 : 1;
+  
+  const dataMap = rawData.reduce((acc, curr) => {
+    acc[curr.date] = curr.orderCount;
+    return acc;
+  }, {});
 
-const DATA_7_DAYS = [
-  { name: 'Mon', value: 1200 },
-  { name: 'Tue', value: 2100 },
-  { name: 'Wed', value: 1800 },
-  { name: 'Thu', value: 2400 },
-  { name: 'Fri', value: 3200 },
-  { name: 'Sat', value: 4500 },
-  { name: 'Sun', value: 3800 },
-];
+  const allDates = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateString = d.toISOString().split('T')[0]; 
+    
+    allDates.push({
+      date: dateString,
+      orderCount: dataMap[dateString] || 0,
+      label: d.toLocaleDateString('ro-RO', { day: '2-digit', month: 'short' })
+    });
+  }
 
-const DATA_30_DAYS = [
-  { name: 'Săpt 1', value: 15000 },
-  { name: 'Săpt 2', value: 18200 },
-  { name: 'Săpt 3', value: 12500 },
-  { name: 'Săpt 4', value: 22000 },
-];
+  if (interval === 1) {
+    return allDates.map(item => ({ date: item.label, orderCount: item.orderCount }));
+  }
 
-const DATA_90_DAYS = [
-  { name: 'Ian', value: 45000 },
-  { name: 'Feb', value: 52000 },
-  { name: 'Mar', value: 68000 },
-];
+  const groupedData = [];
+  for (let i = 0; i < allDates.length; i += interval) {
+    const chunk = allDates.slice(i, i + interval);
+    const sum = chunk.reduce((total, item) => total + item.orderCount, 0);
+    const startLabel = chunk[0].label;
+    const endLabel = chunk[chunk.length - 1].label;
+    const groupLabel = startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+    
+    groupedData.push({
+      date: groupLabel,
+      orderCount: sum
+    });
+  }
 
-// Comenzi Pending (Rămân neschimbate)
-const PENDING_ORDERS = [
-  { id: '#ORD-7782', customer: 'Elena Popescu', date: 'Acum 2 ore', total: 345.00, items: 3 },
-  { id: '#ORD-7781', customer: 'Mihai Ionescu', date: 'Acum 5 ore', total: 120.50, items: 1 },
-  { id: '#ORD-7780', customer: 'Ana Maria Radu', date: 'Ieri, 23:45', total: 850.00, items: 8 },
-  { id: '#ORD-7779', customer: 'Cristina Dobre', date: 'Ieri, 18:30', total: 210.00, items: 2 },
-  { id: '#ORD-7778', customer: 'Vlad Dumitrescu', date: 'Ieri, 14:15', total: 55.99, items: 1 },
-];
-
-// Produse Stoc Limitat
-const LOW_STOCK_ITEMS = [
-  { id: 1, name: 'Sutien Dantelă Negru (S)', stock: 2, image: 'https://images.unsplash.com/photo-1582717906977-2e1d7f6c6946?q=80&w=100&auto=format&fit=crop' },
-  { id: 2, name: 'Pijama Satin Roz (M)', stock: 1, image: 'https://images.unsplash.com/photo-1582717906977-2e1d7f6c6946?q=80&w=100&auto=format&fit=crop' },
-  { id: 3, name: 'Halat Mătase (L)', stock: 3, image: 'https://images.unsplash.com/photo-1582717906977-2e1d7f6c6946?q=80&w=100&auto=format&fit=crop' },
-];
+  return groupedData;
+};
 
 const DashboardAdmin = () => {
-  // State pentru filtru
+  // Chart & Orders State
   const [timeRange, setTimeRange] = useState('7');
+  const [chartData, setChartData] = useState([]);
+  const [isLoadingChart, setIsLoadingChart] = useState(false);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
-  // Logică pentru a determina datele afișate pe baza filtrului
-  const getDashboardData = () => {
-    switch (timeRange) {
-      case '30':
-        return {
-          chartData: DATA_30_DAYS,
-          revenue: "$67,700.00",
-          orders: "+2,140",
-          newClients: "+450",
-          changes: { rev: "+15%", ord: "+12%", cli: "+5%" }
-        };
-      case '90':
-        return {
-          chartData: DATA_90_DAYS,
-          revenue: "$165,000.00",
-          orders: "+6,800",
-          newClients: "+1,200",
-          changes: { rev: "+22%", ord: "+18%", cli: "+10%" }
-        };
-      case '7':
-      default:
-        return {
-          chartData: DATA_7_DAYS,
-          revenue: "$12,345.00",
-          orders: "+573",
-          newClients: "+124",
-          changes: { rev: "+12%", ord: "+8%", cli: "-2%" }
-        };
-    }
-  };
+  // Low Stock State
+  const [lowStockItems, setLowStockItems] = useState([]);
+  const [totalLowStock, setTotalLowStock] = useState(0);
+  const [isLoadingStock, setIsLoadingStock] = useState(false);
 
-  const currentData = getDashboardData();
+  // Pending Orders State
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [totalPending, setTotalPending] = useState(0);
+  const [isLoadingPending, setIsLoadingPending] = useState(false);
+
+  // Fetch Chart Data
+  useEffect(() => {
+    const fetchOrderEvolution = async () => {
+      setIsLoadingChart(true);
+      try {
+        const response = await fetch(`http://localhost:3000/api/admin/order-evolution/${timeRange}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error('Nu s-au putut încărca datele pentru grafic.');
+        
+        const data = await response.json();
+        
+        const formattedData = formatChartData(data.arr || data.data, timeRange);
+        setTotalOrders(data.orders || data.totalOrders);
+        setTotalRevenue(data.total || data.totalRevenue);
+        setChartData(formattedData);
+        
+      } catch (error) {
+        toast.error("Eroare la încărcarea graficului");
+        console.error("Error fetching order evolution:", error);
+      } finally {
+        setIsLoadingChart(false);
+      }
+    };
+
+    fetchOrderEvolution();
+  }, [timeRange]);
+
+  // Fetch Low Stock Products
+  useEffect(() => {
+    const fetchLowStock = async () => {
+      setIsLoadingStock(true);
+      try {
+        const response = await fetch('http://localhost:3000/api/admin/low-stock', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error('Nu s-au putut încărca alertele de stoc.');
+        
+        const data = await response.json();
+        
+        setLowStockItems(data.arr || data.items);
+        setTotalLowStock(data.total);
+        
+      } catch (error) {
+        toast.error("Eroare la încărcarea produselor cu stoc limitat");
+        console.error("Error fetching low stock products:", error);
+      } finally {
+        setIsLoadingStock(false);
+      }
+    };
+
+    fetchLowStock();
+  }, []);
+
+  // Fetch Pending Orders
+  useEffect(() => {
+    const fetchPendingOrders = async () => {
+      setIsLoadingPending(true);
+      try {
+        const response = await fetch('http://localhost:3000/api/admin/pending-orders', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error('Nu s-au putut încărca comenzile în așteptare.');
+        
+        const data = await response.json();
+        
+        setPendingOrders(data.arr);
+        setTotalPending(data.total);
+        
+      } catch (error) {
+        toast.error("Eroare la încărcarea comenzilor");
+        console.error("Error fetching pending orders:", error);
+      } finally {
+        setIsLoadingPending(false);
+      }
+    };
+
+    fetchPendingOrders();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -113,40 +183,11 @@ const DashboardAdmin = () => {
         </div>
       </div>
 
-      {/* 2. KPI Cards (Acum dinamice) */}
+      {/* 2. KPI Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <KpiCard 
-          title="Venituri Totale" 
-          value={currentData.revenue} 
-          change={currentData.changes.rev} 
-          trend="up"
-          icon={DollarSign} 
-        />
-        <KpiCard 
-          title="Comenzi Noi" 
-          value={currentData.orders} 
-          change={currentData.changes.ord} 
-          trend="up"
-          icon={ShoppingBag} 
-        />
-        <KpiCard 
-          title="Clienți Noi" 
-          value={currentData.newClients} 
-          change={currentData.changes.cli} 
-          trend={timeRange === '7' ? "down" : "up"} // Exemplu de logică condițională
-          icon={Users} 
-        />
-      </div>
-
-      {/* 3. Charts & Stock Section */}
-      <div className="grid gap-4 lg:grid-cols-7">
-        
-        {/* Sales Chart */}
-        <div className="col-span-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-lg">Evoluție Vânzări</h3>
-            
-            {/* DROPDOWN FILTRU */}
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex justify-between flex-col gap-2">
+            <h3 className="text-lg font-extrabold">Selectează perioada dorită</h3>
             <select 
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
@@ -157,10 +198,36 @@ const DashboardAdmin = () => {
               <option value="90">Ultimele 90 zile</option>
             </select>
           </div>
+        </div>
+        <KpiCard 
+          title="Venituri Totale" 
+          value={(totalRevenue/100).toFixed(2) + " Lei"} 
+          icon={DollarSign} 
+        />
+        <KpiCard 
+          title="Comenzi Noi" 
+          value={totalOrders} 
+          icon={ShoppingBag} 
+        />
+      </div>
 
-          <div className="h-[300px] w-full">
+      {/* 3. Charts & Stock Section */}
+      <div className="grid gap-4 lg:grid-cols-7">
+        
+        {/* Sales Chart */}
+        <div className="col-span-4 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-semibold text-lg">Evoluție Comenzi</h3>
+          </div>
+
+          <div className="h-[300px] w-full relative">
+            {isLoadingChart && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+              </div>
+            )}
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={currentData.chartData}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ec4899" stopOpacity={0.1}/>
@@ -169,25 +236,26 @@ const DashboardAdmin = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                 <XAxis 
-                  dataKey="name" 
+                  dataKey="date" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#6b7280', fontSize: 12}} 
+                  tick={{fill: '#6b7280', fontSize: 11}} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
                   tick={{fill: '#6b7280', fontSize: 12}} 
-                  tickFormatter={(value) => `$${value}`}
+                  allowDecimals={false}
                 />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   itemStyle={{ color: '#ec4899', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#374151', marginBottom: '4px' }}
                 />
                 <Area 
                   type="monotone" 
-                  dataKey="value" 
+                  dataKey="orderCount" 
                   stroke="#ec4899" 
                   strokeWidth={2}
                   fillOpacity={1} 
@@ -200,30 +268,49 @@ const DashboardAdmin = () => {
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold text-lg flex items-center gap-2">
               <AlertTriangle size={18} className="text-orange-500" />
-              Stoc Limitat
+              Stoc Limitat <span className="text-sm font-normal text-muted-foreground">({totalLowStock})</span>
             </h3>
-            <button className="text-sm text-pink-500 hover:underline">Vezi tot</button>
           </div>
-          <div className="space-y-4">
-            {LOW_STOCK_ITEMS.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 border border-transparent hover:border-border transition-all">
-                <div className="h-12 w-12 rounded-md overflow-hidden bg-white">
-                  <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">ID: #{item.id}</p>
-                </div>
-                <div className="text-right">
-                  <span className="block text-sm font-bold text-red-600">{item.stock} buc</span>
-                  <span className="text-[10px] text-muted-foreground">Rămase</span>
-                </div>
+          
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2 relative" style={{ maxHeight: '300px' }}>
+            {isLoadingStock && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm">
+                <Loader2 className="h-6 w-6 animate-spin text-pink-500" />
               </div>
-            ))}
+            )}
+            
+            {!isLoadingStock && lowStockItems.length === 0 ? (
+               <div className="text-center text-muted-foreground py-8">
+                 Nu există produse cu stoc limitat.
+               </div>
+            ) : (
+              lowStockItems.map((item) => (
+                <div key={item.variant_id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 border border-transparent hover:border-border transition-all">
+                  <div className="h-12 w-12 rounded-md overflow-hidden bg-white shrink-0">
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="h-full w-full object-cover" 
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" title={item.name}>{item.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground">Cod: {item.cod}</span>
+                      <span className="text-xs bg-secondary px-1.5 py-0.5 rounded-md font-medium">Mărime: {item.size}</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="block text-sm font-bold text-red-600">{item.quantity} buc</span>
+                    <span className="text-[10px] text-muted-foreground">Rămase</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -232,15 +319,24 @@ const DashboardAdmin = () => {
       <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-lg">Comenzi Necesită Procesare</h3>
+            <h3 className="font-semibold text-lg">Comenzi Care Necesită Procesare ({totalPending})</h3>
             <p className="text-sm text-muted-foreground">Comenzi primite care nu au fost încă expediate.</p>
           </div>
-          <button className="text-sm font-medium text-foreground bg-secondary px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors">
+          <button 
+            onClick={() => window.location.href = '/admin/orders'}
+            className="text-sm font-medium text-foreground bg-secondary px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors"
+          >
             Vezi toate comenzile
           </button>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative min-h-[200px]">
+          {isLoadingPending && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm">
+              <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+            </div>
+          )}
+          
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
               <tr>
@@ -253,35 +349,54 @@ const DashboardAdmin = () => {
               </tr>
             </thead>
             <tbody>
-              {PENDING_ORDERS.map((order) => (
-                <tr key={order.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
-                  <td className="px-6 py-4 font-medium text-foreground">{order.id}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-xs">
-                        {order.customer.charAt(0)}
-                      </div>
-                      {order.customer}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground flex items-center gap-2">
-                    <Clock size={14} />
-                    {order.date}
-                  </td>
-                  <td className="px-6 py-4 font-medium">${order.total.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
-                      Pending
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-pink-600 hover:text-pink-700 font-medium text-xs inline-flex items-center gap-1">
-                      Procesează <ChevronRight size={14} />
-                    </button>
+              {!isLoadingPending && pendingOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                    Nu există comenzi în așteptare.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                pendingOrders.map((order) => {
+                  const customerName = `${order.first_name} ${order.last_name}`;
+                  const formattedDate = new Date(order.created_at).toLocaleDateString('ro-RO', { 
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                  });
+                  const orderTotal = ((order.total_ammount + (order.shipping_cost || 0)) / 100).toFixed(2);
+
+                  return (
+                    <tr key={order.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
+                      <td className="px-6 py-4 font-medium text-foreground">#ORD-{order.id}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-xs">
+                            {order.first_name.charAt(0)}
+                          </div>
+                          {customerName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground flex items-center gap-2">
+                        <Clock size={14} />
+                        {formattedDate}
+                      </td>
+                      <td className="px-6 py-4 font-medium">{orderTotal} Lei</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                          În Așteptare
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button 
+                          onClick={() => window.location.href = `/admin/orders/${order.id}`}
+                          className="text-pink-600 hover:text-pink-700 font-medium text-xs inline-flex items-center gap-1"
+                        >
+                          Procesează <ChevronRight size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -293,26 +408,17 @@ const DashboardAdmin = () => {
 
 // --- Helper Components ---
 
-const KpiCard = ({ title, value, change, trend, icon: Icon }: any) => {
-  const isPositive = trend === 'up';
-  
+const KpiCard = ({ title, value, icon: Icon }) => {
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-muted-foreground">{title}</span>
-        <div className={`p-2 rounded-full ${isPositive ? 'bg-pink-50 text-pink-600' : 'bg-gray-100 text-gray-600'}`}>
+        <div className="p-2 rounded-full bg-pink-50 text-pink-600">
           <Icon size={20} />
         </div>
       </div>
       <div className="mt-4">
-        <h3 className="text-2xl font-bold">{value}</h3>
-        <div className="flex items-center mt-1 text-xs">
-          <span className={`flex items-center font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight size={14} className="mr-1" /> : <ArrowDownRight size={14} className="mr-1" />}
-            {change}
-          </span>
-          <span className="text-muted-foreground ml-2">față de perioada anterioară</span>
-        </div>
+        <h3 className="text-3xl font-bold">{value}</h3>
       </div>
     </div>
   );

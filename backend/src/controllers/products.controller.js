@@ -174,6 +174,7 @@ export const createProductAdmin = async (req, res) => {
             
             return res.status(400).json({
                 error: 'Validare Esuata',
+                message: 'Validare produs eșuată',
                 details: result.error.format(), // Send this to frontend to see WHICH field failed
             });
         }
@@ -212,7 +213,7 @@ export const updateProductAdmin=async (req,res)=>{
         const product=await updateProduct(Number(id),data)
 
         if (!product) {
-            return res.status(404).json({ error: 'Produsul nu a fost găsit' });
+            return res.status(404).json({ error: 'Produsul nu a fost găsit', message: 'Produsul nu a fost găsit' });
         }
 
         return res.status(200).json({
@@ -221,7 +222,7 @@ export const updateProductAdmin=async (req,res)=>{
         })
     } catch (error) {
         logger.error('product update error', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error', message: 'Eroare internă a serverului' });
     }
 }
 
@@ -278,7 +279,7 @@ export const createVariantAdmin=async (req,res)=>{
 
         if (!variant) {
             logger.error('Insert returned no variant');
-            return res.status(500).json({ error: 'Could not create variant' });
+            return res.status(500).json({ error: 'Could not create variant', message: 'Nu s-a putut crea varianta' });
         }
 
         logger.info(`Product with id ${variant.id} created successfully`);
@@ -318,7 +319,7 @@ export const updateVariantAdmin=async (req,res)=>{
 
         if(!updatedVariant){
             logger.error('Update returned no variant');
-            return res.status(500).json({ error: 'Could not update variant' });
+            return res.status(500).json({ error: 'Could not update variant', message: 'Nu s-a putut actualiza varianta' });
         }
 
         logger.info(`Product with id ${variantId} updated successfully`);
@@ -345,11 +346,11 @@ export const generateUploadUrl = async (req, res) => {
         // This prevents the "undefined/image.png" error
         if (!PUBLIC_IMAGE_DOMAIN) {
             logger.error("CRITICAL: PUBLIC_IMAGE_DOMAIN is missing in .env or config");
-            return res.status(500).json({ error: "Server configuration error" });
+            return res.status(500).json({ error: "Server configuration error", message: 'Configurare server invalidă' });
         }
 
         if (!fileType) {
-            return res.status(400).json({ error: "File type is required" });
+            return res.status(400).json({ error: "File type is required", message: 'Tipul fișierului este obligatoriu' });
         }
 
         // 2. BETTER EXTENSION HANDLING
@@ -363,9 +364,9 @@ export const generateUploadUrl = async (req, res) => {
 
         const extension = mimeToExt[fileType];
 
-        if (!extension) {
-             return res.status(400).json({ error: "Invalid file type. Only JPG, PNG, and WebP allowed." });
-        }
+           if (!extension) {
+               return res.status(400).json({ error: "Invalid file type. Only JPG, PNG, and WebP allowed.", message: 'Tip fișier invalid. Sunt permise doar JPG, PNG și WebP.' });
+           }
 
         const fileName = `${uuidv4()}.${extension}`;
 
@@ -391,6 +392,6 @@ export const generateUploadUrl = async (req, res) => {
 
     } catch (error) {
         logger.error("Error generating upload URL:", error);
-        return res.status(500).json({ error: "Could not generate upload URL" });
+        return res.status(500).json({ error: "Could not generate upload URL", message: 'Nu s-a putut genera URL-ul de încărcare' });
     }
 };
