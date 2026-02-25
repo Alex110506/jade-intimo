@@ -5330,3 +5330,162 @@
 {"level":"info","message":"::1 - - [24/Feb/2026:23:06:23 +0000] \"GET /api/admin/order-evolution/7 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
 {"level":"info","message":"::1 - - [24/Feb/2026:23:06:23 +0000] \"GET /api/admin/pending-orders HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
 {"level":"info","message":"::1 - - [24/Feb/2026:23:06:23 +0000] \"GET /api/admin/low-stock HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:36 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:37 +0000] \"GET /api/auth/getAddress HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:37 +0000] \"GET /api/cart HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"new products retrieved sucessfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:38 +0000] \"GET /api/products/new HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:38 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:38 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:11:52:39 +0000] \"GET /api/order/get HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:39 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:40 +0000] \"GET /api/auth/getAddress HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:40 +0000] \"GET /api/cart HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"new products retrieved sucessfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:41 +0000] \"GET /api/products/new HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:41 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:24:41 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"product with id 6 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:34:11 +0000] \"GET /api/products/6 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:34:50 +0000] \"GET /api/products?category=curvy-marimi-mari&gender=women&sortBy=newest&page=1&limit=12 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:34:56 +0000] \"GET /api/products?category=curvy-marimi-mari&gender=women&sortBy=newest&page=1&limit=12 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:35:07 +0000] \"GET /api/products?category=curvy-marimi-mari&gender=women&sortBy=newest&page=1&limit=12 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:42:29 +0000] \"GET /api/admin/low-stock HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:42:29 +0000] \"GET /api/admin/order-evolution/7 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:42:29 +0000] \"GET /api/admin/pending-orders HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:12:42:35 +0000] \"GET /api/admin/order-evolution/30 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:42:37 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:08 +0000] \"GET /api/auth/getAddress HTTP/1.1\" - - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:09 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:09 +0000] \"GET /api/auth/getAddress HTTP/1.1\" 200 187 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:09 +0000] \"GET /api/cart HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"new products retrieved sucessfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:09 +0000] \"GET /api/products/new HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:09 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:43:10 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:58:23 +0000] \"GET /api/order/get HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:16:58:26 +0000] \"GET /api/order/details/13 HTTP/1.1\" 200 616 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:07:29 +0000] \"GET /api/admin/order-evolution/7 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:07:29 +0000] \"GET /api/admin/low-stock HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:07:29 +0000] \"GET /api/admin/pending-orders HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:08:37 +0000] \"GET /api/auth/me HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:08:37 +0000] \"GET /api/auth/getAddress HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:08:37 +0000] \"GET /api/cart HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:08:37 +0000] \"GET /api/order/admin/12 HTTP/1.1\" 200 562 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:10:39 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Generated upload URL for file: 6cd9b578-7210-4d17-bf29-cd4463c0a8c6.jpg","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:37 +0000] \"POST /api/products/admin/upload-url HTTP/1.1\" 200 649 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Generated upload URL for file: 47b8c0dd-f517-4f34-8e98-5dd71ed74bd1.png","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:37 +0000] \"POST /api/products/admin/upload-url HTTP/1.1\" 200 649 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Generated upload URL for file: 20cbbb54-15ed-4098-a2b6-a46ee376f1c1.jpg","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:37 +0000] \"POST /api/products/admin/upload-url HTTP/1.1\" 200 649 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:43 +0000] \"POST /api/products/admin HTTP/1.1\" 201 703 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:43 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest HTTP/1.1\" 200 3258 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:12:58 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest&gender=men HTTP/1.1\" 200 1903 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:13:00 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest&gender=men&category=pijamale HTTP/1.1\" 200 1162 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:13:04 +0000] \"GET /api/products/8 HTTP/1.1\" 200 741 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:13:49 +0000] \"GET /api/products/8 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product with id 6 created successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:14:12 +0000] \"POST /api/products/admin/variant/8 HTTP/1.1\" 201 141 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:14:12 +0000] \"GET /api/products/8 HTTP/1.1\" 200 829 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product with id 6 updated successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:14:51 +0000] \"PUT /api/products/admin/variant/6 HTTP/1.1\" 201 141 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:14:51 +0000] \"GET /api/products/8 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Product with id 6 updated successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:00 +0000] \"PUT /api/products/admin/variant/6 HTTP/1.1\" 201 141 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:00 +0000] \"GET /api/products/8 HTTP/1.1\" 200 829 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"new products retrieved sucessfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:04 +0000] \"GET /api/products/new HTTP/1.1\" 200 3194 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:05 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 200 2129 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:05 +0000] \"GET /api/products?limit=4&sortBy=best-selling HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"Products retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:16 +0000] \"GET /api/products?category=pijamale&gender=men&sortBy=newest&page=1&limit=12 HTTP/1.1\" 200 1152 \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 8 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:15:34 +0000] \"GET /api/products/8 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1\"","service":"user-service"}
+{"level":"info","message":"product with id 2 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:19:05 +0000] \"GET /api/products/2 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"new product 2 added to cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:19:08 +0000] \"POST /api/cart HTTP/1.1\" 200 116 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Order with id 20 placed successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:19:18 +0000] \"POST /api/order/place HTTP/1.1\" 201 47 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:19:20 +0000] \"GET /api/order/get HTTP/1.1\" 200 4307 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"product with id 1 retrieved successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:28:06 +0000] \"GET /api/products/1 HTTP/1.1\" 304 - \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"new product 1 added to cart 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:28:09 +0000] \"POST /api/cart HTTP/1.1\" 200 116 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"Order with id 21 placed successfully","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:28:29 +0000] \"POST /api/order/place HTTP/1.1\" 201 47 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:00 +0000] \"GET /api/admin/order-evolution/7 HTTP/1.1\" 200 310 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:00 +0000] \"GET /api/admin/low-stock HTTP/1.1\" 200 455 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:00 +0000] \"GET /api/admin/pending-orders HTTP/1.1\" 200 2681 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"Products for admin retrieved successfully - Page: 1","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:02 +0000] \"GET /api/products/admin?page=1&limit=10&sortBy=newest HTTP/1.1\" 200 3258 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:06 +0000] \"GET /api/order/admin?page=1&limit=10 HTTP/1.1\" 200 3760 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:09 +0000] \"GET /api/order/admin/21 HTTP/1.1\" 200 564 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}
+{"level":"info","message":"User authenticated: alex11amr110506@gmail.com (admin)","service":"user-service"}
+{"level":"info","message":"::1 - - [25/Feb/2026:17:29:12 +0000] \"PATCH /api/order/admin/21 HTTP/1.1\" 200 404 \"http://localhost:8080/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36\"","service":"user-service"}

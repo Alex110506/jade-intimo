@@ -22,7 +22,6 @@ const ProductGrid = ({ products, title, description }: ProductGridProps) => {
     );
   }
 
-  console.log(products)
 
   return (
     <div>

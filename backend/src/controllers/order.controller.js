@@ -116,7 +116,6 @@ export const placeOrderController = async (req, res) => {
             shipping_cost = 1000;
 
         const orderDetails=await fetchDetailsWithId(insertResult.orderId)
-        console.log(orderDetails)
         const items=orderDetails.items
 
         const fullName=orderData.first_name+" "+orderData.last_name

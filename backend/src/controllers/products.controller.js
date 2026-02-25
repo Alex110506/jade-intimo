@@ -166,8 +166,6 @@ export const createProductAdmin = async (req, res) => {
         // 2. Validate
         const result = createProductSchema.safeParse(body);
 
-        console.log(result)
-
         if (!result.success) {
             // Log full error for debugging
             logger.warn("Validation failed:", JSON.stringify(result.error.format(), null, 2));
